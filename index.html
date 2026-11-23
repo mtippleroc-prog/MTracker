@@ -56,11 +56,14 @@ textarea{min-height:70px}
 label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-bottom:4px}
 .grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
 @media(max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
-.lay{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;grid-template-areas:"sum form" "cas form" "fav form" "like form";gap:24px clamp(20px,3vw,40px);align-items:start}
-.a-sum{grid-area:sum}.a-form{grid-area:form}.a-fav{grid-area:fav}.a-cas{grid-area:cas}
+.lay{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto auto auto auto 1fr;grid-template-areas:"sum form" "cas form" "fav form" "like form" "gift form";gap:24px clamp(20px,3vw,40px);align-items:start}
+.a-sum{grid-area:sum}.a-form{grid-area:form}.a-fav{grid-area:fav}.a-cas{grid-area:cas}.a-gift{grid-area:gift}
+.gifts{list-style:none;margin:6px 0 10px;padding:0}.gift{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.gn{font-family:"Bodoni Moda",Georgia,serif;font-size:20px;color:var(--acc);text-align:center}.gl{display:flex;gap:6px}.gl a{font-size:13px;font-weight:600;color:var(--acc);border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;text-decoration:none;min-height:36px;display:inline-flex;align-items:center}
+@media(max-width:600px){.gift{grid-template-columns:26px minmax(0,1fr)}.gl{grid-column:2}}
 .crow{display:grid;grid-template-columns:minmax(0,1fr) 110px 130px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.crow label{font-weight:500}
 @media(max-width:600px){.crow{grid-template-columns:minmax(0,1fr) 88px 110px;gap:6px}}.a-like{grid-area:like}
-@media(max-width:900px){.lay{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"sum" "form" "cas" "fav" "like"}}
+@media(max-width:900px){.lay{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"sum" "form" "cas" "fav" "like" "gift"}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,2.4vw,26px)}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}
 .muted{color:var(--muted)}.note{font-size:14px;color:var(--muted)}
@@ -290,6 +293,78 @@ function likesHtml(p){
  const any=LIKES.some(([k])=>l[k]);
  return `<div class="card"><div class="head"><div><h2>Interests</h2><div class="note">Colors, teams, music, hobbies and gift ideas.</div></div><button class="btn ghost small" id="likesEdit">${any?'Edit':'+ Add'}</button></div>${any?LIKES.filter(([k])=>l[k]).map(([k,n])=>`<div class="lrow"><div class="favcat">${n}</div><div class="tags">${tags(k,l[k])}</div></div>`).join(''):'<p class="muted">Add favorite colors, teams, musicians and hobbies.</p>'}</div>`}
 const savePerson=(p,extra)=>api('savePerson',{id:p.id,name:p.name,relation:p.relation||'',notes:p.notes||'',created:p.created,...extra});
+const IMAP={
+ fishing:[['Fishing lure assortment','tackle box lure assortment'],['Polarized fishing sunglasses','polarized fishing sunglasses men'],['Performance fishing shirt','UPF fishing shirt men','polo']],
+ golf:[['Personalized golf balls','personalized golf balls'],['Golf polo','golf polo men','polo'],['Golf rangefinder','golf rangefinder']],
+ boating:[['Waterproof dry bag','waterproof dry bag'],['Boat shoes','boat shoes men','sneaker'],['Floating sunglasses strap','floating sunglasses retainer']],
+ hockey:[['Hockey stick tape & wax kit','hockey stick tape kit'],['Hockey hoodie','hockey hoodie men','hoodie']],
+ basketball:[['Outdoor basketball','outdoor basketball'],['Basketball shoes','basketball shoes men','sneaker']],
+ baseball:[['Baseball glove conditioner kit','baseball glove care kit'],['Batting gloves','batting gloves adult']],
+ football:[['Leather football','official size leather football']],
+ soccer:[['Soccer ball','soccer ball size 5'],['Soccer training socks','soccer grip socks']],
+ lacrosse:[['Lacrosse rebounder','lacrosse rebounder net']],
+ running:[['Running shoes','running shoes men','sneaker'],['Running belt','running belt phone'],['Quarter-zip running top','running quarter zip men','tee']],
+ hiking:[['Hiking day pack','hiking daypack 20L'],['Merino hiking socks','merino wool hiking socks']],
+ camping:[['Camp hammock','camping hammock'],['Rechargeable headlamp','rechargeable headlamp']],
+ skiing:[['Ski goggles','ski goggles men'],['Merino base layer','merino base layer men','tee']],
+ snowboarding:[['Snowboard goggles','snowboard goggles'],['Neck gaiter','fleece neck gaiter']],
+ cycling:[['Bike multi-tool','bike multi tool'],['Bike light set','rechargeable bike light set']],
+ gym:[['Adjustable dumbbells','adjustable dumbbells'],['Gym duffel bag','gym duffel bag men']],
+ fitness:[['Massage gun','massage gun'],['Gym duffel bag','gym duffel bag men']],
+ lifting:[['Lifting belt','weightlifting belt'],['Gym duffel bag','gym duffel bag men']],
+ gaming:[['Gaming headset','gaming headset'],['Gaming gift card','video game gift card']],
+ 'video games':[['Gaming headset','gaming headset'],['Gaming gift card','video game gift card']],
+ reading:[['Kindle Paperwhite','Kindle Paperwhite'],['Book light','rechargeable book light']],
+ cooking:[['Chef’s knife','chef knife 8 inch'],['Cast iron skillet','cast iron skillet']],
+ grilling:[['Instant-read meat thermometer','instant read meat thermometer'],['Grill tool set','grill tool set']],
+ guitar:[['Guitar strings & picks set','guitar strings picks set'],['Clip-on tuner','clip on guitar tuner']],
+ music:[['Wireless earbuds','wireless earbuds'],['Bluetooth speaker','portable bluetooth speaker']],
+ photography:[['Camera sling bag','camera sling bag'],['Mini tripod','mini tripod phone']],
+ travel:[['Packing cubes','packing cubes set'],['Tech organizer pouch','travel tech organizer']],
+ lego:[['LEGO Technic set','LEGO Technic set'],['LEGO Architecture set','LEGO Architecture set']],
+ cars:[['Car detailing kit','car detailing kit'],['Car phone mount','magnetic car phone mount']],
+ movies:[['Movie theater gift card','movie theater gift card'],['Popcorn maker','popcorn maker']],
+ coffee:[['Pour-over coffee kit','pour over coffee kit'],['Insulated travel mug','insulated travel mug']],
+ hunting:[['Hunting knife','fixed blade hunting knife'],['Blaze orange beanie','blaze orange beanie']],
+ skateboarding:[['Skateboard deck','skateboard deck'],['Skate shoes','skate shoes men','sneaker']],
+ swimming:[['Swim goggles','swim goggles'],['Microfiber towel','quick dry microfiber towel']],
+ tennis:[['Tennis balls (case)','tennis balls case'],['Tennis racket','tennis racket']],
+ pickleball:[['Pickleball paddle','pickleball paddle'],['Pickleball balls','outdoor pickleball balls']]
+};
+const LBL={tee:'T-shirts',polo:'Polos',bd:'button-downs',hoodie:'Sweatshirts & hoodies',sweater:'Sweaters',jacket:'Jackets'};
+const list=v=>String(v||'').split(',').map(x=>x.trim()).filter(Boolean);
+function giftIdeas(p,shift){
+ const L=latest(p.id),c=(p.prefs||{}).casual||{},lk=p.likes||{};
+ const csz=k=>c[k]&&c[k].size?c[k].size:'';
+ const sz=k=>{if(k==='sneaker'&&L.sneaker)return fmtShoe(L.sneaker.v);if(k==='hat'&&L.head)return hatSize(L.head.v).fitted;return csz(k)};
+ const avoid=(p.favorites||[]).filter(f=>f.pref==='avoid'&&f.brand).map(f=>f.brand.toLowerCase());
+ const colors=list(lk.colors),color=i=>colors.length?colors[i%colors.length]:'';
+ const favB=(p.favorites||[]).filter(f=>f.pref!=='avoid'&&f.brand);
+ const src=[];const add=(bucket,t,q,why,szk)=>{const s=szk?sz(szk):'';src.push({bucket,t,q,why:why+(s?` · size ${s}`:''),size:s})};
+ list(lk.gifts).forEach(g=>add(0,g,g,'On his gift list'));
+ list(lk.teams).forEach((tm,i)=>{add(1,`${tm} hoodie`,`${tm} hoodie men`,`He follows the ${tm}`,'hoodie');add(1,`${tm} New Era fitted cap`,`${tm} New Era 59FIFTY fitted ${L.head?hatSize(L.head.v).fitted:''}`,`He follows the ${tm}`,'hat');add(1,`Tickets to a ${tm} game`,`${tm} tickets`,`He follows the ${tm}`);add(1,`${tm} quarter-zip`,`${tm} quarter zip pullover`,`He follows the ${tm}`,'sweater')});
+ list(lk.music).forEach(a=>{add(2,`${a} concert tickets`,`${a} tour tickets`,`He listens to ${a}`);add(2,`${a} vinyl record`,`${a} vinyl`,`He listens to ${a}`);add(2,`${a} tour T-shirt`,`${a} t-shirt`,`He listens to ${a}`,'tee')});
+ list(lk.interests).forEach(it=>{const key=Object.keys(IMAP).find(k=>it.toLowerCase().includes(k));
+  if(key)IMAP[key].forEach(([t,q,szk])=>add(3,t,q,`For his ${it}`,szk));else{add(3,`${it} gear`,`${it} gift for men`,`For his ${it}`);add(3,`Book about ${it}`,`best books about ${it}`,`For his ${it}`)}});
+ favB.forEach((f,i)=>{const k={'T-shirts':'tee','Polos':'polo','Casual button-downs':'bd','Sweaters & hoodies':'hoodie','Jackets & outerwear':'jacket','Sneakers':'sneaker'}[f.cat];const s=f.size||(k?sz(k):'');
+  add(4,`${f.brand}${f.style?' '+f.style:''}${color(i)?' in '+color(i):''}`,`${f.brand} ${f.style||f.cat} ${color(i)}`.trim(),`One of his ${f.pref==='fav'?'favorite':'liked'} brands${s?' · size '+s:''}`)});
+ if(L.head)add(5,'Boston Scally cap',`Boston Scally cap ${hatSize(L.head.v).scally}`,`Classic flat cap · size ${hatSize(L.head.v).scally}`);
+ if(L.neck&&L.sleeve)add(5,`Dress shirt${color(1)?' in '+color(1):''}`,`men's dress shirt ${frac(Math.ceil(L.neck.v*2)/2)} ${Math.round(L.sleeve.v)} ${color(1)}`.trim(),`Size ${frac(Math.ceil(L.neck.v*2)/2)} / ${Math.round(L.sleeve.v)}`);
+ if(colors.length)add(5,`Silk tie in ${colors[0]}`,`silk tie ${colors[0]}`,`His favorite color is ${colors[0]}`);
+ if(csz('sweater'))add(5,`Merino sweater${color(2)?' in '+color(2):''}`,`merino crew neck sweater men ${color(2)}`.trim(),`For cooler days`,'sweater');
+ // drop avoided brands and duplicates, then take from each category in turn
+ const seen=new Set(),ok=src.filter(x=>{const k=x.t.toLowerCase();if(seen.has(k)||avoid.some(a=>k.includes(a)))return false;seen.add(k);return true});
+ const buckets=[0,1,2,3,4,5].map(b=>ok.filter(x=>x.bucket===b));buckets.forEach(b=>{if(b.length){const n=shift%b.length;b.push(...b.splice(0,n))}});
+ const out=[];let i=0;while(out.length<10&&buckets.some(b=>b.length)){const b=buckets[(i+shift)%6];if(b.length)out.push(b.shift());i++}
+ return out}
+function giftsHtml(p){
+ const g=(p.prefs||{}).gifts,lk=p.likes||{},has=list(lk.teams).length+list(lk.music).length+list(lk.interests).length+list(lk.gifts).length+(p.favorites||[]).length;
+ const items=g&&g.items?Object.values(g.items):[];
+ const row=(x,i)=>{const q=encodeURIComponent(x.q||x.t);return `<li class="gift"><span class="gn">${i+1}</span><div><b>${esc(x.t)}</b><div class="note">${esc(x.why||'')}</div></div><div class="gl"><a href="https://www.google.com/search?tbm=shop&q=${q}" target="_blank" rel="noopener">Google</a><a href="https://www.amazon.com/s?k=${q}" target="_blank" rel="noopener">Amazon</a></div></li>`};
+ return `<div class="card"><div class="head"><div><h2>Gift ideas</h2><div class="note">${items.length?'Built '+esc(fdate(g.at))+' from his interests, favorite brands and sizes.':'Ten ideas from his interests, favorite brands and sizes, with shopping links.'}</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="giftGo"${has?'':' disabled'}>${items.length?'Shuffle ideas':'Find gift ideas'}</button></div></div>
+  ${has?'':'<p class="muted">Add teams, music, hobbies or favorite brands under Interests and Casual favorites first.</p>'}
+  ${items.length?`<ol class="gifts">${items.map(row).join('')}</ol><p class="note">Links open a search with the idea and size filled in. Check sizes against each brand’s chart.</p>`:''}<span class="note" id="giftMsg" role="status"></span></div>`}
 function banner(msg){const b=$('banner');b.textContent=msg||'';b.classList.toggle('hidden',!msg)}
 function entriesFor(pid){return S.entries.filter(e=>e.personId===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0))}
 function latest(pid){const out={};for(const e of entriesFor(pid))for(const k in (e.values||{})){if(!out[k])out[k]={v:e.values[k],date:e.date};else if(!out[k].prev)out[k].prev=e.values[k]}return out}
@@ -355,7 +430,7 @@ function renderTrack(){
   <p class="note">Tap a figure for step-by-step instructions. Leave anything you didn’t measure blank. Grey numbers are the last recorded values.</p>
  </form>`;
  const hist=list.length?`<div class="card" style="margin-top:24px"><h2 style="margin-bottom:12px">History</h2><div class="hist"><table><thead><tr><th>Date</th>${F.map(f=>`<th>${f.n}</th>`).join('')}<th>By</th><th></th></tr></thead><tbody>${list.map(e=>`<tr><td>${esc(fdate(e.date))}</td>${F.map(f=>`<td>${e.values?.[f.k]!=null?show(f,e.values[f.k]):''}</td>`).join('')}<td style="text-align:left">${esc(e.by||'')}</td><td><button class="btn ghost small" data-edit="${esc(e.id)}">Edit</button> <button class="btn danger small" data-del="${esc(e.id)}">${S.confirm===e.id?'Confirm':'Delete'}</button></td></tr>`).join('')}</tbody></table></div></div>`:'';
- el.innerHTML=`<div class="lay"><div class="a-sum">${left}</div><div class="a-form">${right}</div><div class="a-cas">${casualHtml(p)}</div><div class="a-fav">${favsHtml(p)}</div><div class="a-like">${likesHtml(p)}</div></div>${hist}`;
+ el.innerHTML=`<div class="lay"><div class="a-sum">${left}</div><div class="a-form">${right}</div><div class="a-cas">${casualHtml(p)}</div><div class="a-fav">${favsHtml(p)}</div><div class="a-like">${likesHtml(p)}</div><div class="a-gift">${giftsHtml(p)}</div></div>${hist}`;
 }
 function renderGuide(){
  const f=FK[S.guide];
@@ -416,6 +491,11 @@ document.addEventListener('click',async ev=>{
  if(t.id==='delLast'){if(S.busy)return;readForm();if(S.confirm!=='last'){S.confirm='last';renderTrack();return}
   const last=entriesFor(S.sel)[0];if(!last)return;S.confirm=null;S.busy=true;t.disabled=true;t.textContent='Deleting…';
   try{if(S.edit===last.id){S.edit=null;S.form=null}await api('deleteEntry',{id:last.id})}catch(e){banner('Couldn\u2019t delete — try again.');renderTrack()}finally{S.busy=false}return}
+ if(t.id==='giftGo'){if(S.busy)return;const p=S.people.find(x=>x.id===S.sel);const prev=(p.prefs||{}).gifts;const shift=prev?(prev.shift||0)+1:0;
+  const ideas=giftIdeas(p,shift);if(!ideas.length){$('giftMsg').textContent='Add some interests first.';return}
+  const items={};ideas.forEach((x,i)=>items['i'+i]={t:x.t.slice(0,110),q:x.q.slice(0,110),why:x.why.slice(0,110)});
+  const prefs=JSON.parse(JSON.stringify(p.prefs||{}));prefs.gifts={at:today(),shift,items};p.prefs=prefs;readForm();renderTrack();
+  S.busy=true;try{await savePerson(p,{prefs})}catch(e){const m=$('giftMsg');if(m)m.textContent='Ideas shown but not saved — check your connection.'}finally{S.busy=false}return}
  if(t.id==='copyCsv'){const list=entriesFor(S.sel).slice().reverse();const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
   const rows=[['Date',...F.map(f=>f.n+(f.u==='len'?' (in)':f.u==='wt'?' (lb)':'')),'Measured by','Notes'],...list.map(e=>[e.date,...F.map(f=>e.values?.[f.k]??''),e.by||'',e.note||''])];
   try{await navigator.clipboard.writeText(rows.map(r=>r.map(q).join(',')).join('\n'));$('copyMsg').textContent='Copied — paste into a spreadsheet.'}catch(e){$('copyMsg').textContent='Copy was blocked by the browser.'}return}
