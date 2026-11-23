@@ -74,6 +74,7 @@ label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-b
 .thumb{width:52px;height:64px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0;cursor:pointer}
 .thumb svg{width:100%;height:100%;display:block}
 .unitin{position:relative}.unitin input{padding-right:40px;text-align:right}
+.shoesel{display:grid;gap:6px}.shoesel select{min-height:40px;padding:6px 8px}
 .unitin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
 .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:6px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
@@ -199,10 +200,18 @@ const F=[
   s:['Shoes off, heels against a wall, looking straight ahead.','Lay a book flat on top of the head, mark the wall, and measure up from the floor.'],t:'Height picks the jacket length: roughly Short under 5′7″, Regular 5′8″–6′0″, Long 6′1″ and up.'},
  {k:'weight',g:'b',n:'Weight',u:'wt',vb:'0 0 200 420',d:'',
   s:['Same scale, same time of day, light clothes.'],t:'Not needed for tailoring, but useful for tracking growth and for some brands’ size charts.'},
- {k:'shoe',g:'b',n:'Shoe size',u:'txt',vb:'60 370 90 50',d:'<path d="M104 412L132 412"/>',
-  s:['Record the US size of a dress shoe that fits well, plus width if not medium (e.g. 10½ D or 11 E).','Feet are largest late in the day — try shoes on then.'],t:'Text field — write it the way the shoe box does.'}
+ {k:'shoe',g:'h',n:'Dress shoe',u:'txt',sel:1,vb:'60 370 90 50',d:'<path d="M104 412L132 412"/>',
+  s:['Use the size of a dress shoe that fits well now — the number inside the tongue or on the box (US men’s).','Pick a width if it isn’t medium: on the box, D is medium, E or 2E is wide, 4E is extra wide, B is narrow.','Feet swell late in the day, so try shoes on in the afternoon or evening.'],t:'Dress shoes often run about a half size larger than sneakers — size each one separately.'},
+ {k:'sneaker',g:'h',n:'Sneaker',u:'txt',sel:1,vb:'60 370 90 50',d:'<path d="M104 412L132 412"/>',
+  s:['Use the size of the athletic shoe he wears most (US men’s).','Wear the socks he usually wears with them when trying on.','Leave about a thumb’s width between the longest toe and the front of the shoe.'],t:'Brands differ — a 10 in Nike can fit like a 10½ in New Balance. Add the brand in the notes if it matters.'}
 ];
-const G={s:'Shirts & suit jackets',p:'Trousers',b:'General'};
+const SZ=[];for(let x=3;x<=16;x+=.5)SZ.push(x);SZ.push(17,18);
+const WD=[['N','Narrow'],['M','Medium'],['W','Wide'],['XW','Extra wide']];
+const WMAP={B:'N',N:'N',D:'M',M:'M',E:'W','2E':'W',W:'W','3E':'XW','4E':'XW',XW:'XW'};
+const parseShoe=v=>{const m=String(v??'').trim().match(/^(\d+(?:\.\d+)?)\s*([A-Za-z0-9]*)/);return m?{z:+m[1],w:WMAP[(m[2]||'M').toUpperCase()]||'M'}:{z:null,w:'M'}};
+const shoeSel=(f,cur)=>{const p=parseShoe(cur);return `<div class="shoesel"><select id="v-${f.k}" data-sz="${f.k}" aria-label="${f.n} size"><option value="">Size</option>${SZ.map(z=>`<option value="${z}"${p.z===z?' selected':''}>${frac(z)}</option>`).join('')}</select><select data-wd="${f.k}" aria-label="${f.n} width">${WD.map(w=>`<option value="${w[0]}"${p.w===w[0]?' selected':''}>${w[1]}</option>`).join('')}</select></div>`};
+const fmtShoe=v=>{const p=parseShoe(v);if(p.z==null)return esc(v);const w=WD.find(x=>x[0]===p.w);return frac(p.z)+(p.w!=='M'?' '+w[1]:'')};
+const G={s:'Shirts & suit jackets',p:'Trousers',h:'Shoes',b:'General'};
 const FK=Object.fromEntries(F.map(f=>[f.k,f]));
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
@@ -214,7 +223,7 @@ try{S.unit=localStorage.getItem('fr-unit')||'in';S.sel=localStorage.getItem('fr-
 const overlay=f=>f.d?`<g class="tape">${f.d}</g><g class="tick">${f.d}</g>`:'';
 const thumb=f=>`<svg viewBox="${f.vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><use href="#body" width="200" height="420"/>${overlay(f)}</svg>`;
 const frac=v=>{const q=Math.round(v*4)/4,w=Math.floor(q),r=q-w;return (w||(r?'':'0'))+(['','¼','½','¾'][r*4]||'')};
-const show=(f,v)=>{if(v==null||v==='')return '—';if(f.u==='txt')return esc(v);
+const show=(f,v)=>{if(v==null||v==='')return '—';if(f.sel)return fmtShoe(v);if(f.u==='txt')return esc(v);
  if(f.u==='wt')return S.unit==='in'?Math.round(v)+' lb':(v*0.453592).toFixed(1)+' kg';
  if(S.unit==='cm')return (v*2.54).toFixed(1)+' cm';
  if(f.k==='height'){const ft=Math.floor(v/12);return ft+'′ '+frac(v-ft*12)+'″'}
@@ -254,7 +263,8 @@ function sizeCard(L){
  if(v('chest')){const c=Math.round(v('chest')/2)*2;let len='';const h=v('height');if(h)len=h<67?'S':h<=72?'R':'L';out.push(['Suit jacket',c+len,h?'chest + length':'add height for S/R/L'])}
  if(v('waist')&&v('inseam'))out.push(['Trousers',Math.round(v('waist'))+' × '+Math.round(v('inseam')),'waist × inseam']);
  else if(v('waist'))out.push(['Trouser waist',Math.round(v('waist')),'add inseam for length']);
- if(v('shoe'))out.push(['Shoe',esc(v('shoe')),'US']);
+ if(v('shoe'))out.push(['Dress shoe',fmtShoe(v('shoe')),'US men\u2019s']);
+ if(v('sneaker'))out.push(['Sneaker',fmtShoe(v('sneaker')),'US men\u2019s']);
  return out;
 }
 function renderTrack(){
@@ -282,8 +292,8 @@ function renderTrack(){
   <div><label class="f" for="mBy">Measured by</label><input id="mBy" value="${esc(fm.by)}" maxlength="40" placeholder="e.g. Dad, the tailor"></div></div>
   ${Object.keys(G).map(g=>`<div class="grp"><h3>${G[g]}</h3>${F.filter(f=>f.g===g).map(f=>`<div class="frow">
    <button type="button" class="thumb" data-guide="${f.k}" aria-label="How to measure ${f.n}">${thumb(f)}</button>
-   <label class="lbl" for="v-${f.k}">${f.n}<small>${esc(f.s[0].length>70?f.s[0].slice(0,68).replace(/\s\S*$/,'')+'…':f.s[0])}</small></label>
-   <div class="unitin"><input id="v-${f.k}" data-k="${f.k}" ${f.u==='txt'?'':'inputmode="decimal"'} value="${esc(fm.vals[f.k]??'')}" placeholder="${L[f.k]?esc(String(toInput(f,L[f.k].v))):''}"><span>${unitLbl(f)}</span></div></div>`).join('')}</div>`).join('')}
+   <label class="lbl" for="v-${f.k}">${f.n}<small>${f.sel&&L[f.k]?'Last recorded: '+fmtShoe(L[f.k].v):esc(f.s[0].length>70?f.s[0].slice(0,68).replace(/\s\S*$/,'')+'…':f.s[0])}</small></label>
+   ${f.sel?shoeSel(f,fm.vals[f.k]):`<div class="unitin"><input id="v-${f.k}" data-k="${f.k}" ${f.u==='txt'?'':'inputmode="decimal"'} value="${esc(fm.vals[f.k]??'')}" placeholder="${L[f.k]?esc(String(toInput(f,L[f.k].v))):''}"><span>${unitLbl(f)}</span></div>`}</div>`).join('')}</div>`).join('')}
   <div style="margin-top:14px"><label class="f" for="mNote">Notes</label><textarea id="mNote" maxlength="500" placeholder="e.g. measured over dress shirt; fits Brooks Brothers 15½/33">${esc(fm.note)}</textarea></div>
   <div class="actions"><button class="btn" type="submit"${S.ok?'':' disabled'}>${S.edit?'Save changes':'Save fitting'}</button>${S.edit?'<button type="button" class="btn ghost" id="cancelEdit">Cancel edit</button>':''}<span class="note" id="saveMsg" role="status"></span></div>
   <p class="note">Tap a figure for step-by-step instructions. Leave anything you didn’t measure blank. Grey numbers are the last recorded values.</p>
@@ -303,7 +313,8 @@ function dotPos(f){const m=f.d.match(/M\s*([\d.]+)\s+([\d.]+)/)||f.d.match(/cx="
 function render(){renderPeople();renderPersonPanel();renderTrack();renderGuide()}
 
 function readForm(){const fm=S.form;if(!$('mform'))return;fm.date=$('mDate').value;fm.by=$('mBy').value;fm.note=$('mNote').value;
- document.querySelectorAll('#mform input[data-k]').forEach(i=>{fm.vals[i.dataset.k]=i.value})}
+ document.querySelectorAll('#mform input[data-k]').forEach(i=>{fm.vals[i.dataset.k]=i.value});
+ document.querySelectorAll('#mform select[data-sz]').forEach(z=>{const k=z.dataset.sz,w=document.querySelector(`#mform select[data-wd="${k}"]`).value;fm.vals[k]=z.value?z.value+' '+w:''})}
 function setTab(t){$('tab-track').setAttribute('aria-selected',t==='track');$('tab-guide').setAttribute('aria-selected',t==='guide');
  $('view-track').classList.toggle('hidden',t!=='track');$('view-guide').classList.toggle('hidden',t!=='guide')}
 function select(id){readForm();S.sel=id;S.edit=null;S.form=null;S.confirm=null;try{localStorage.setItem('fr-sel',id)}catch(e){}render()}
