@@ -90,6 +90,7 @@ label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-b
 .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid var(--line);border-radius:999px;font-size:14px;background:var(--bg)}
 .tag i{width:13px;height:13px;border-radius:50%;border:1px solid rgba(0,0,0,.25);flex:none}
 @media(max-width:600px){.fav{grid-template-columns:minmax(0,1fr) auto}.fav .favcat{grid-column:1/-1}.fav .favbtn{grid-column:1/-1}.lrow{grid-template-columns:minmax(0,1fr)}}
+.ftin{display:grid;grid-template-columns:1fr 1fr;gap:6px}.ftin input{padding-right:24px;padding-left:6px}.ftin .unitin span{right:7px}
 .unitin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
 .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:6px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
@@ -229,6 +230,8 @@ const parseShoe=v=>{const m=String(v??'').trim().match(/^(\d+(?:\.\d+)?)\s*([A-Z
 const shoeSel=(f,cur)=>{const p=parseShoe(cur);return `<div class="shoesel"><select id="v-${f.k}" data-sz="${f.k}" aria-label="${f.n} size"><option value="">Size</option>${SZ.map(z=>`<option value="${z}"${p.z===z?' selected':''}>${frac(z)}</option>`).join('')}</select><select data-wd="${f.k}" aria-label="${f.n} width">${WD.map(w=>`<option value="${w[0]}"${p.w===w[0]?' selected':''}>${w[1]}</option>`).join('')}</select></div>`};
 const frac8=v=>{const q=Math.round(v*8)/8,w=Math.floor(q),r=Math.round((q-w)*8);return w+(['','⅛','¼','⅜','½','⅝','¾','⅞'][r]||'')};
 const hatSize=c=>({fitted:frac8(Math.round(c/Math.PI*8)/8),flex:c<=21.25?'XS/S':c<=22.5?'S/M':c<=23.75?'L/XL':'XL/XXL'});
+const ftIn=(cur,last)=>{const sp=v=>{const t=parseFloat(v);if(!isFinite(t))return ['',''];const ft=Math.floor(t/12);return [ft,+(t-ft*12).toFixed(2)]};const [f1,i1]=sp(cur),[f0,i0]=sp(last);
+ return `<div class="ftin"><div class="unitin"><input id="v-height" data-ft="1" inputmode="numeric" value="${f1}" placeholder="${f0}" aria-label="Height feet"><span>ft</span></div><div class="unitin"><input data-inch="1" inputmode="decimal" value="${i1}" placeholder="${i0}" aria-label="Height inches"><span>in</span></div></div>`};
 const fmtShoe=v=>{const p=parseShoe(v);if(p.z==null)return esc(v);const w=WD.find(x=>x[0]===p.w);return frac(p.z)+(p.w!=='M'?' '+w[1]:'')};
 const G={s:'Shirts & suit jackets',p:'Trousers',h:'Shoes',c:'Hats',b:'General'};
 const FK=Object.fromEntries(F.map(f=>[f.k,f]));
@@ -346,7 +349,7 @@ function renderTrack(){
   ${Object.keys(G).map(g=>`<div class="grp"><h3>${G[g]}</h3>${F.filter(f=>f.g===g).map(f=>`<div class="frow">
    <button type="button" class="thumb" data-guide="${f.k}" aria-label="How to measure ${f.n}">${thumb(f)}</button>
    <label class="lbl" for="v-${f.k}">${f.n}<small>${f.sel&&L[f.k]?'Last recorded: '+fmtShoe(L[f.k].v):esc(f.s[0].length>70?f.s[0].slice(0,68).replace(/\s\S*$/,'')+'…':f.s[0])}</small></label>
-   ${f.sel?shoeSel(f,fm.vals[f.k]):`<div class="unitin"><input id="v-${f.k}" data-k="${f.k}" ${f.u==='txt'?'':'inputmode="decimal"'} value="${esc(fm.vals[f.k]??'')}" placeholder="${L[f.k]?esc(String(toInput(f,L[f.k].v))):''}"><span>${unitLbl(f)}</span></div>`}</div>`).join('')}</div>`).join('')}
+   ${f.sel?shoeSel(f,fm.vals[f.k]):f.k==='height'&&S.unit==='in'?ftIn(fm.vals.height,L.height?.v):`<div class="unitin"><input id="v-${f.k}" data-k="${f.k}" ${f.u==='txt'?'':'inputmode="decimal"'} value="${esc(fm.vals[f.k]??'')}" placeholder="${L[f.k]?esc(String(toInput(f,L[f.k].v))):''}"><span>${unitLbl(f)}</span></div>`}</div>`).join('')}</div>`).join('')}
   <div style="margin-top:14px"><label class="f" for="mNote">Notes</label><textarea id="mNote" maxlength="500" placeholder="e.g. measured over dress shirt; fits Brooks Brothers 15½/33">${esc(fm.note)}</textarea></div>
   <div class="actions"><button class="btn" type="submit"${S.ok?'':' disabled'}>${S.edit?'Save changes':'Save fitting'}</button>${S.edit?'<button type="button" class="btn ghost" id="cancelEdit">Cancel edit</button>':''}<span class="note" id="saveMsg" role="status"></span></div>
   <p class="note">Tap a figure for step-by-step instructions. Leave anything you didn’t measure blank. Grey numbers are the last recorded values.</p>
@@ -367,6 +370,7 @@ function render(){renderPeople();renderPersonPanel();renderTrack();renderGuide()
 
 function readForm(){const fm=S.form;if(!$('mform'))return;fm.date=$('mDate').value;fm.by=$('mBy').value;fm.note=$('mNote').value;
  document.querySelectorAll('#mform input[data-k]').forEach(i=>{fm.vals[i.dataset.k]=i.value});
+ {const fi=document.querySelector('#mform input[data-ft]'),ii=document.querySelector('#mform input[data-inch]');if(fi){const a=fi.value.trim(),b=ii.value.trim();fm.vals.height=a===''&&b===''?'':String((parseFloat(a)||0)*12+(parseFloat(b)||0))}}
  document.querySelectorAll('#mform select[data-sz]').forEach(z=>{const k=z.dataset.sz,w=document.querySelector(`#mform select[data-wd="${k}"]`).value;fm.vals[k]=z.value?z.value+' '+w:''})}
 function setTab(t){$('tab-track').setAttribute('aria-selected',t==='track');$('tab-guide').setAttribute('aria-selected',t==='guide');
  $('view-track').classList.toggle('hidden',t!=='track');$('view-guide').classList.toggle('hidden',t!=='guide')}
