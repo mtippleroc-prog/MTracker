@@ -259,7 +259,10 @@ const fromInput=(f,s)=>{s=String(s).trim();if(!s)return null;if(f.u==='txt')retu
  return f.u==='wt'?(S.unit==='in'?n:n/0.453592):(S.unit==='in'?n:n/2.54)};
 const unitLbl=f=>f.u==='txt'?'':f.u==='wt'?(S.unit==='in'?'lb':'kg'):(S.unit==='in'?'in':'cm');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-const fdate=s=>{if(!s)return '';const [y,m,d]=s.split('-');return new Date(+y,+m-1,+d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
+// Accepts 2026-11-23, an ISO time, or a spelled-out date (older sheet rows) and returns yyyy-mm-dd.
+const normDate=v=>{const s=String(v??'').trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);const d=new Date(s);if(!s||isNaN(d))return '';return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fdate=s=>{s=normDate(s);if(!s)return 'no date';const [y,m,d]=s.split('-');return new Date(+y,+m-1,+d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
+const relOf=r=>{r=String(r||'').trim();return /^n\/?a$/i.test(r)?'':r};
 
 const CATS=['T-shirts','Polos','Casual button-downs','Sweaters & hoodies','Jackets & outerwear','Jeans','Chinos & casual pants','Shorts','Activewear','Sneakers','Boots & casual shoes','Socks','Underwear','Hats','Other'];
 const MATS=['','Cotton','Cotton stretch','Linen','Wool','Merino','Cashmere','Denim','Fleece','Performance / poly','Leather','Suede','Other'];
@@ -372,7 +375,7 @@ function latest(pid){const out={};for(const e of entriesFor(pid))for(const k in 
 function renderPeople(){
  const ps=[...S.people].sort((a,b)=>(a.order??a.created??0)-(b.order??b.created??0));
  if(ps.length&&!ps.some(p=>p.id===S.sel))S.sel=ps[0].id;
- $('people').innerHTML=ps.map(p=>`<button class="chip" data-p="${esc(p.id)}" aria-pressed="${p.id===S.sel}">${esc(p.name)}${p.relation?`<small>${esc(p.relation)}</small>`:''}</button>`).join('')+`<button class="chip add" id="addP">+ Add person</button>`;
+ $('people').innerHTML=ps.map(p=>`<button class="chip" data-p="${esc(p.id)}" aria-pressed="${p.id===S.sel}">${esc(p.name)}${relOf(p.relation)?`<small>${esc(relOf(p.relation))}</small>`:''}</button>`).join('')+`<button class="chip add" id="addP">+ Add person</button>`;
 }
 function renderPersonPanel(){
  const el=$('personPanel');const pf=S.personForm;if(!pf){el.classList.add('hidden');return}
@@ -380,7 +383,7 @@ function renderPersonPanel(){
  el.innerHTML=`<h3>${pf.id?'Edit person':'Add a family member'}</h3>
  <div class="meta" style="margin-top:12px">
   <div><label class="f" for="pName">Name</label><input id="pName" value="${esc(pf.name||'')}" maxlength="40"></div>
-  <div><label class="f" for="pRel">Relationship</label><input id="pRel" list="rels" value="${esc(pf.relation||'')}" maxlength="30"><datalist id="rels"><option>Son</option><option>Me</option><option>Father</option><option>Brother</option><option>Nephew</option><option>Father-in-law</option></datalist></div>
+  <div><label class="f" for="pRel">Relationship</label><input id="pRel" list="rels" value="${esc(pf.relation||'')}" maxlength="30"><datalist id="rels"><option>Son</option><option>N/A</option><option>Me</option><option>Father</option><option>Brother</option><option>Nephew</option><option>Father-in-law</option></datalist></div>
  </div>
  <label class="f" for="pNotes">Fit notes &amp; favorite brands</label><textarea id="pNotes" maxlength="600" placeholder="e.g. Slim fit shirts; Suit 38R; prefers flat-front trousers">${esc(pf.notes||'')}</textarea>
  <div class="actions"><button class="btn" id="pSave">Save</button><button class="btn ghost" id="pCancel">Cancel</button>${pf.id?`<button class="btn danger" id="pDel">${S.confirm==='p'?'Tap again to delete person and all their measurements':'Delete person'}</button>`:''}</div>`;
@@ -407,7 +410,7 @@ function renderTrack(){
  const L=latest(p.id),list=entriesFor(p.id),sc=sizeCard(L);
  const known=F.filter(f=>L[f.k]);
  const left=`<div class="card">
-  <div class="head"><div><h2>${esc(p.name)}</h2><div class="note">${esc(p.relation||'')}${list.length?` · last measured ${esc(fdate(list[0].date))}`:''}</div></div>
+  <div class="head"><div><h2>${esc(p.name)}</h2><div class="note">${[esc(relOf(p.relation)),list.length?`last measured ${esc(fdate(list[0].date))}`:''].filter(Boolean).join(' · ')}</div></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Units"><button data-unit="in" aria-pressed="${S.unit==='in'}">in / lb</button><button data-unit="cm" aria-pressed="${S.unit==='cm'}">cm / kg</button></div><button class="btn ghost small" id="editP">Edit</button></div></div>
   ${sc.length?`<h3>Sizes to shop</h3><div class="sizes">${sc.map(s=>`<div class="size"><span>${s[0]}</span><b>${s[1]}</b><span>${s[2]}</span></div>`).join('')}</div><p class="note">A starting point from the latest measurements — brands vary, so check each brand’s chart.</p>`:''}
   ${p.notes?`<div class="tip" style="margin-bottom:8px">${esc(p.notes)}</div>`:''}
@@ -522,7 +525,7 @@ document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.closest(
 async function api(action,data){
  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:S.key,action,data})});
  const j=await r.json();if(j.error)throw new Error(j.error);apply(j);return j}
-function apply(j){S.oldScript=!(j.v>=3);S.people=j.people||[];S.entries=(j.entries||[]).map(e=>({...e,values:e.values||{}}));S.loaded=true;S.ok=true;readForm();renderPeople();renderTrack()}
+function apply(j){S.oldScript=!(j.v>=3);S.people=j.people||[];S.entries=(j.entries||[]).map(e=>({...e,date:normDate(e.date),values:e.values||{}}));S.loaded=true;S.ok=true;readForm();renderPeople();renderTrack()}
 async function load(quiet){
  if(!API.startsWith('https://')){banner('Setup needed: paste the Apps Script URL into index.html.');return}
  if(!S.key){S.needKey=true;renderTrack();return}
