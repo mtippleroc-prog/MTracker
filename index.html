@@ -339,7 +339,7 @@ function renderTrack(){
   <h3 style="margin-top:18px">Latest measurements</h3>
   ${known.length?`<table class="ledger"><tbody>${known.map(f=>{const l=L[f.k];let ch='';if(f.u!=='txt'&&l.prev!=null&&+l.v!==+l.prev){const d=l.v-l.prev;ch=`<span class="up">${d>0?'+':'−'}${f.u==='wt'?show(f,Math.abs(d)):S.unit==='cm'?(Math.abs(d)*2.54).toFixed(1):frac(Math.abs(d))}</span>`}
    return `<tr><td>${f.n}</td><td class="n">${show(f,l.v)}${ch}</td><td class="note">${esc(fdate(l.date))}</td></tr>`}).join('')}</tbody></table>`:`<p class="muted">No measurements yet — fill in the form to record the first set.</p>`}
-  <div class="actions"><button class="btn ghost small" id="copyCsv"${list.length?'':' disabled'}>Copy history (CSV)</button><span class="note" id="copyMsg" role="status"></span></div>
+  <div class="actions"><button class="btn ghost small" id="copyCsv"${list.length?'':' disabled'}>Copy history (CSV)</button>${list.length?`<button class="btn danger small" id="delLast">${S.confirm==='last'?`Tap again to delete ${esc(fdate(list[0].date))}`:'Delete last fitting'}</button>`:''}<span class="note" id="copyMsg" role="status"></span></div>
  </div>`;
  const fm=S.form||(S.form={date:today(),by:'',note:'',vals:{}});
  const right=`<form class="card" id="mform" autocomplete="off">
@@ -413,6 +413,9 @@ document.addEventListener('click',async ev=>{
  if(t.id==='likesCancel'){readForm();S.likesEdit=false;renderTrack();return}
  if(t.id==='likesSave'){const p=S.people.find(x=>x.id===S.sel);const likes={};for(const [k] of LIKES)likes[k]=$('l-'+k).value.trim();
   $('likesMsg').textContent='Saving…';readForm();try{S.likesEdit=false;await savePerson(p,{likes})}catch(e){S.likesEdit=true;renderTrack();$('likesMsg').textContent='Couldn’t save — try again.'}return}
+ if(t.id==='delLast'){if(S.busy)return;readForm();if(S.confirm!=='last'){S.confirm='last';renderTrack();return}
+  const last=entriesFor(S.sel)[0];if(!last)return;S.confirm=null;S.busy=true;t.disabled=true;t.textContent='Deleting…';
+  try{if(S.edit===last.id){S.edit=null;S.form=null}await api('deleteEntry',{id:last.id})}catch(e){banner('Couldn\u2019t delete — try again.');renderTrack()}finally{S.busy=false}return}
  if(t.id==='copyCsv'){const list=entriesFor(S.sel).slice().reverse();const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
   const rows=[['Date',...F.map(f=>f.n+(f.u==='len'?' (in)':f.u==='wt'?' (lb)':'')),'Measured by','Notes'],...list.map(e=>[e.date,...F.map(f=>e.values?.[f.k]??''),e.by||'',e.note||''])];
   try{await navigator.clipboard.writeText(rows.map(r=>r.map(q).join(',')).join('\n'));$('copyMsg').textContent='Copied — paste into a spreadsheet.'}catch(e){$('copyMsg').textContent='Copy was blocked by the browser.'}return}
