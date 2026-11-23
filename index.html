@@ -428,7 +428,7 @@ document.addEventListener('submit',async ev=>{
  const data={personId:S.sel,date:fm.date,by:fm.by.trim(),note:fm.note.trim(),values,created:Date.now()};
  msg.textContent='Saving…';S.busy=true;
  const eid=S.edit||uid(),keep=S.edit;try{if(S.edit){const old=S.entries.find(x=>x.id===S.edit);data.created=old?.created||data.created}
-  await api('saveEntry',{id:eid,...data});S.edit=null;S.form=null;renderTrack();const m=$('saveMsg');if(m)m.textContent='Saved.'}
+  await api('saveEntry',{id:eid,...data});S.edit=null;S.form={date:data.date,by:data.by,note:'',vals:{}};renderTrack();const m=$('saveMsg');if(m)m.textContent='Saved for '+fdate(data.date)+'.'}
  catch(e){msg.textContent='Couldn’t save — check your connection and try again.'}
  finally{S.busy=false}
 });
@@ -442,13 +442,13 @@ document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.closest(
 async function api(action,data){
  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:S.key,action,data})});
  const j=await r.json();if(j.error)throw new Error(j.error);apply(j);return j}
-function apply(j){S.people=j.people||[];S.entries=(j.entries||[]).map(e=>({...e,values:e.values||{}}));S.loaded=true;S.ok=true;readForm();renderPeople();renderTrack()}
+function apply(j){S.oldScript=!(j.v>=3);S.people=j.people||[];S.entries=(j.entries||[]).map(e=>({...e,values:e.values||{}}));S.loaded=true;S.ok=true;readForm();renderPeople();renderTrack()}
 async function load(quiet){
  if(!API.startsWith('https://')){banner('Setup needed: paste the Apps Script URL into index.html.');return}
  if(!S.key){S.needKey=true;renderTrack();return}
  try{const r=await fetch(API+'?k='+encodeURIComponent(S.key));const j=await r.json();
   if(j.error==='bad key'){S.needKey=true;try{localStorage.removeItem('fr-key')}catch(e){}banner('That family code didn’t work.');renderTrack();return}
-  if(j.error)throw new Error(j.error);S.needKey=false;banner('');apply(j)}
+  if(j.error)throw new Error(j.error);S.needKey=false;apply(j);banner(S.oldScript?'Heads up: the Google Sheet script is an older version, so casual sizes, favorites, interests, sneakers and hat sizes won\u2019t save. In Apps Script, paste the latest Code.gs, then Deploy → Manage deployments → pencil → Version: New version → Deploy.':'')}
  catch(e){if(!quiet)banner('Couldn’t reach the measurements sheet. Check your connection and reload.')}}
 document.addEventListener('submit',ev=>{if(ev.target.id!=='keyform')return;ev.preventDefault();const k=$('kIn').value.trim();if(!k)return;S.key=k;S.needKey=false;try{localStorage.setItem('fr-key',k)}catch(e){}S.loaded=false;renderTrack();load()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.loaded&&!S.edit&&!S.personForm&&!S.favForm&&!S.likesEdit)load(true)});
