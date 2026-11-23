@@ -213,7 +213,7 @@ const F=[
  {k:'thigh',g:'p',n:'Thigh',u:'len',vb:'70 240 100 90',d:'<ellipse cx="119" cy="278" rx="19" ry="4"/>',
   s:['Around the fullest part of the upper thigh, about an inch below the crotch.','Keep the leg relaxed and weight on both feet.'],t:'Helps decide between slim, straight and athletic cuts.'},
  {k:'head',g:'c',n:'Head (hats)',u:'len',vb:'55 0 90 80',d:'<ellipse cx="100" cy="27" rx="23" ry="5"/>',
-  s:['Wrap the tape around the head about ⅛ inch above the eyebrows and the tops of the ears.','Go around the widest part at the back of the head, keeping the tape level.','Snug but comfortable — the way a hat should sit.','If he\u2019s between sizes, round up.'],t:'Fitted hats use sizes like 7⅛: the head measurement in inches divided by 3.14. Flex-fit caps are usually S/M up to about 22½″, L/XL from 22½″ to 23¾″.'},
+  s:['Wrap the tape around the head about ⅛ inch above the eyebrows and the tops of the ears.','Go around the widest part at the back of the head, keeping the tape level.','Snug but comfortable — the way a hat should sit.','Measure twice and use the larger number.'],t:'New Era 59FIFTY fitted: 7 = 22″, 7⅛ = 22⅜″, 7¼ = 22¾″, 7⅜ = 23⅛″, 7½ = 23½″, 7⅝ = 23⅞″, 7¾ = 24¼″. 39THIRTY stretch-fit: S/M up to about 22¾″, M/L 22¾–23⅞″, L/XL 23⅞″ and up. Boston Scally (six-panel): XS 21–21.6″, S 22–22.5″, M/L 22.8–23″, XL 23.6–24″, 2XL 24.4–24.8″, 3XL 25″+. Between sizes? Go down for snug, up for comfort — some buyers find Scally caps run small.'},
  {k:'height',g:'b',n:'Height',u:'len',vb:'0 0 200 420',d:'<path d="M188 12L188 408"/><path d="M180 12L196 12M180 408L196 408"/>',
   s:['Shoes off, heels against a wall, looking straight ahead.','Lay a book flat on top of the head, mark the wall, and measure up from the floor.'],t:'Height picks the jacket length: roughly Short under 5′7″, Regular 5′8″–6′0″, Long 6′1″ and up.'},
  {k:'weight',g:'b',n:'Weight',u:'wt',vb:'0 0 200 420',d:'',
@@ -229,7 +229,7 @@ const WMAP={B:'N',N:'N',D:'M',M:'M',E:'W','2E':'W',W:'W','3E':'XW','4E':'XW',XW:
 const parseShoe=v=>{const m=String(v??'').trim().match(/^(\d+(?:\.\d+)?)\s*([A-Za-z0-9]*)/);return m?{z:+m[1],w:WMAP[(m[2]||'M').toUpperCase()]||'M'}:{z:null,w:'M'}};
 const shoeSel=(f,cur)=>{const p=parseShoe(cur);return `<div class="shoesel"><select id="v-${f.k}" data-sz="${f.k}" aria-label="${f.n} size"><option value="">Size</option>${SZ.map(z=>`<option value="${z}"${p.z===z?' selected':''}>${frac(z)}</option>`).join('')}</select><select data-wd="${f.k}" aria-label="${f.n} width">${WD.map(w=>`<option value="${w[0]}"${p.w===w[0]?' selected':''}>${w[1]}</option>`).join('')}</select></div>`};
 const frac8=v=>{const q=Math.round(v*8)/8,w=Math.floor(q),r=Math.round((q-w)*8);return w+(['','⅛','¼','⅜','½','⅝','¾','⅞'][r]||'')};
-const hatSize=c=>({fitted:frac8(Math.round(c/Math.PI*8)/8),flex:c<=21.25?'XS/S':c<=22.5?'S/M':c<=23.75?'L/XL':'XL/XXL'});
+const hatSize=c=>{const cm=c*2.54;return {fitted:frac8(Math.round(c/Math.PI*8)/8),scally:cm<55.5?'XS':cm<57.5?'S':cm<59.5?'M/L':cm<61.5?'XL':cm<63.5?'2XL':'3XL',stretch:c<22.6?'S/M':c<23.75?'M/L':'L/XL'}};
 const ftIn=(cur,last)=>{const sp=v=>{const t=parseFloat(v);if(!isFinite(t))return ['',''];const ft=Math.floor(t/12);return [ft,+(t-ft*12).toFixed(2)]};const [f1,i1]=sp(cur),[f0,i0]=sp(last);
  return `<div class="ftin"><div class="unitin"><input id="v-height" data-ft="1" inputmode="numeric" value="${f1}" placeholder="${f0}" aria-label="Height feet"><span>ft</span></div><div class="unitin"><input data-inch="1" inputmode="decimal" value="${i1}" placeholder="${i0}" aria-label="Height inches"><span>in</span></div></div>`};
 const fmtShoe=v=>{const p=parseShoe(v);if(p.z==null)return esc(v);const w=WD.find(x=>x[0]===p.w);return frac(p.z)+(p.w!=='M'?' '+w[1]:'')};
@@ -318,7 +318,7 @@ function sizeCard(L){
  if(v('chest')){const c=Math.round(v('chest')/2)*2;let len='';const h=v('height');if(h)len=h<67?'S':h<=72?'R':'L';out.push(['Suit jacket',c+len,h?'chest + length':'add height for S/R/L'])}
  if(v('waist')&&v('inseam'))out.push(['Trousers',Math.round(v('waist'))+' × '+Math.round(v('inseam')),'waist × inseam']);
  else if(v('waist'))out.push(['Trouser waist',Math.round(v('waist')),'add inseam for length']);
- if(v('head')){const h=hatSize(v('head'));out.push(['Hat',h.fitted,'fitted · '+h.flex+' flex-fit'])}
+ if(v('head')){const h=hatSize(v('head'));out.push(['New Era',h.fitted+' · '+h.stretch,'59FIFTY fitted · 39THIRTY stretch']);out.push(['Scally cap',h.scally,'Boston Scally'])}
  if(v('shoe'))out.push(['Dress shoe',fmtShoe(v('shoe')),'US men\u2019s']);
  if(v('sneaker'))out.push(['Sneaker',fmtShoe(v('sneaker')),'US men\u2019s']);
  return out;
