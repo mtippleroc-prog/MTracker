@@ -188,6 +188,7 @@ label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-b
   </div>
  </div></section>
 </main>
+<footer class="band note" style="text-align:center;padding-top:0">MTracker · page version 7</footer>
 
 <script>
 {
@@ -260,7 +261,13 @@ const fromInput=(f,s)=>{s=String(s).trim();if(!s)return null;if(f.u==='txt')retu
 const unitLbl=f=>f.u==='txt'?'':f.u==='wt'?(S.unit==='in'?'lb':'kg'):(S.unit==='in'?'in':'cm');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 // Accepts 2026-11-23, an ISO time, or a spelled-out date (older sheet rows) and returns yyyy-mm-dd.
-const normDate=v=>{const s=String(v??'').trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);const d=new Date(s);if(!s||isNaN(d))return '';return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+const normDate=v=>{const s=String(v??'').trim();if(!s)return '';const z=(y,m,d)=>y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');let m;
+ if(m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/))return z(m[1],+m[2],+m[3]);
+ if(m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))return z(m[3],+m[1],+m[2]);
+ if(m=s.match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/)){const mo=MON[m[1].toLowerCase()];if(mo)return z(m[3],mo,+m[2])}
+ if(/^\d+(\.\d+)?$/.test(s)){const n=+s;const d=n>1e11?new Date(n):n>20000&&n<80000?new Date(Date.UTC(1899,11,30)+n*864e5):null;if(d&&!isNaN(d))return n>1e11?z(d.getFullYear(),d.getMonth()+1,d.getDate()):z(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate())}
+ const d=new Date(s);return isNaN(d)?'':z(d.getFullYear(),d.getMonth()+1,d.getDate())};
 const fdate=s=>{s=normDate(s);if(!s)return 'no date';const [y,m,d]=s.split('-');return new Date(+y,+m-1,+d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
 const relOf=r=>{r=String(r||'').trim();return /^n\/?a$/i.test(r)?'':r};
 
