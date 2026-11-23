@@ -9,7 +9,7 @@
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#6b1d2b">
+<meta name="theme-color" content="#7b2cbf">
 <meta name="apple-mobile-web-app-title" content="MTracker">
 <meta property="og:title" content="MTracker">
 <meta property="og:description" content="Family clothing measurements — suits, shirts and trousers.">
@@ -34,17 +34,21 @@ h1,h2,h3{font-family:"Bodoni Moda",Georgia,serif;line-height:1.05;margin:0;text-
 h1{font-size:clamp(32px,5vw,48px)}h2{font-size:clamp(26px,3.4vw,34px)}h3{font-size:20px}
 .band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
 .wrap{max-width:1240px;margin:0 auto}
-header.band{background:var(--band);color:var(--bandink);padding-bottom:0}
+header.band{position:relative;overflow:hidden;isolation:isolate;background:#7b2cbf;color:#fff;padding-bottom:0;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+header.band::before{content:"";position:absolute;inset:-60px;z-index:-2;filter:blur(16px) saturate(1.25);
+ background:repeating-conic-gradient(from 0deg at 24% 42%,#ff2d6f,#ff8a00 4%,#ffd400 8%,#22c55e 12%,#06b6d4 16%,#4f46e5 20%,#c026d3 24%,#ff2d6f 28%)}
+header.band::after{content:"";position:absolute;inset:0;z-index:-1;
+ background:repeating-radial-gradient(circle at 24% 42%,rgba(255,255,255,.16) 0 5px,transparent 9px 30px),linear-gradient(rgba(28,6,40,.36),rgba(28,6,40,.5))}
 .brand{display:flex;align-items:center;gap:14px}.brand img{width:clamp(44px,6vw,60px);height:auto;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.25);flex:none}
-header p{margin:8px 0 18px;opacity:.85;max-width:60ch}
+header p{margin:8px 0 18px;opacity:.95;max-width:60ch}
 .people{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:20px}
-.chip{font:inherit;font-weight:500;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:inherit;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--bandink);color:#6b1d2b;border-color:var(--bandink)}
+.chip{font:inherit;font-weight:500;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.7);background:rgba(20,0,30,.28);color:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:#fff;color:#3b0a52;border-color:#fff;text-shadow:none}
 .chip small{opacity:.7;font-weight:400;margin-left:6px}
 .chip.add{border-style:dashed}
 nav.tabs{display:flex;gap:4px}
-nav.tabs button{font:inherit;font-weight:600;min-height:44px;padding:10px 18px;border:0;border-radius:10px 10px 0 0;background:rgba(255,255,255,.12);color:inherit;cursor:pointer}
-nav.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+nav.tabs button{font:inherit;font-weight:600;min-height:44px;padding:10px 18px;border:0;border-radius:10px 10px 0 0;background:rgba(20,0,30,.35);color:inherit;cursor:pointer}
+nav.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink);text-shadow:none}
 button,input,select,textarea{font:inherit}
 :focus-visible{outline:3px solid var(--tape);outline-offset:2px}
 .btn{min-height:44px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--acc);background:var(--acc);color:var(--bg);font-weight:600;cursor:pointer}
@@ -56,6 +60,9 @@ textarea{min-height:70px}
 label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-bottom:4px}
 .grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
 @media(max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.lay{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;grid-template-areas:"sum form" "fav form" "like form";gap:24px clamp(20px,3vw,40px);align-items:start}
+.a-sum{grid-area:sum}.a-form{grid-area:form}.a-fav{grid-area:fav}.a-like{grid-area:like}
+@media(max-width:900px){.lay{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"sum" "form" "fav" "like"}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,2.4vw,26px)}
 .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}
 .muted{color:var(--muted)}.note{font-size:14px;color:var(--muted)}
@@ -75,6 +82,16 @@ label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-b
 .thumb svg{width:100%;height:100%;display:block}
 .unitin{position:relative}.unitin input{padding-right:40px;text-align:right}
 .shoesel{display:grid;gap:6px}.shoesel select{min-height:40px;padding:6px 8px}
+.fav{display:grid;grid-template-columns:150px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.favcat{font-size:13px;font-weight:600;color:var(--muted)}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;border:1px solid var(--line)}
+.pill.p-fav{background:var(--acc);border-color:var(--acc);color:var(--bg)}.pill.p-avoid{border-color:var(--bad);color:var(--bad)}
+.favbtn{display:flex;gap:6px}
+.lrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid var(--line);border-radius:999px;font-size:14px;background:var(--bg)}
+.tag i{width:13px;height:13px;border-radius:50%;border:1px solid rgba(0,0,0,.25);flex:none}
+@media(max-width:600px){.fav{grid-template-columns:minmax(0,1fr) auto}.fav .favcat{grid-column:1/-1}.fav .favbtn{grid-column:1/-1}.lrow{grid-template-columns:minmax(0,1fr)}}
 .unitin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
 .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:6px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
@@ -236,12 +253,39 @@ const unitLbl=f=>f.u==='txt'?'':f.u==='wt'?(S.unit==='in'?'lb':'kg'):(S.unit==='
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fdate=s=>{if(!s)return '';const [y,m,d]=s.split('-');return new Date(+y,+m-1,+d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
 
+const CATS=['T-shirts','Polos','Casual button-downs','Sweaters & hoodies','Jackets & outerwear','Jeans','Chinos & casual pants','Shorts','Activewear','Sneakers','Boots & casual shoes','Socks','Underwear','Hats','Other'];
+const MATS=['','Cotton','Cotton stretch','Linen','Wool','Merino','Cashmere','Denim','Fleece','Performance / poly','Leather','Suede','Other'];
+const PREFS=[['fav','Favorite'],['like','Likes'],['avoid','Avoid']];
+const LIKES=[['colors','Favorite colors','e.g. navy, forest green, gray'],['teams','Teams','e.g. Bills, Sabres, Syracuse'],['music','Musicians & bands','e.g. Zach Bryan, Foo Fighters'],['interests','Hobbies & interests','e.g. fishing, golf, boating'],['gifts','Gift ideas','e.g. Bills hoodie (XL), fishing lures']];
+const prefOf=v=>PREFS.some(p=>p[0]===v)?v:'like';
+const hasCSS=typeof CSS!=='undefined'&&CSS.supports;
+const tags=(k,v)=>String(v).split(',').map(x=>x.trim()).filter(Boolean).map(x=>{const c=x.replace(/\s+/g,'').toLowerCase();const sw=k==='colors'&&/^[a-z]{3,20}$/.test(c)&&hasCSS&&CSS.supports('color',c);return `<span class="tag">${sw?`<i style="background:${c}"></i>`:''}${esc(x)}</span>`}).join('');
+function favsHtml(p){
+ const ff=S.favForm,fl=(p.favorites||[]).map((f,i)=>({...f,i})).sort((a,b)=>(CATS.indexOf(a.cat)+99)%99-(CATS.indexOf(b.cat)+99)%99||prefOf(a.pref).localeCompare(prefOf(b.pref)));
+ const form=ff?`<div class="panel"><div class="meta">
+  <div><label class="f" for="fCat">Category</label><select id="fCat">${CATS.map(c=>`<option${c===ff.cat?' selected':''}>${c}</option>`).join('')}</select></div>
+  <div><label class="f" for="fBrand">Brand</label><input id="fBrand" maxlength="60" value="${esc(ff.brand||'')}" placeholder="e.g. Levi’s, Patagonia"></div>
+  <div><label class="f" for="fStyle">Style / fit</label><input id="fStyle" maxlength="60" value="${esc(ff.style||'')}" placeholder="e.g. 511 slim, quarter-zip"></div>
+  <div><label class="f" for="fMat">Material</label><select id="fMat">${MATS.map(m=>`<option value="${m}"${m===(ff.mat||'')?' selected':''}>${m||'Any'}</option>`).join('')}</select></div>
+  <div><label class="f" for="fSize">Size</label><input id="fSize" maxlength="30" value="${esc(ff.size||'')}" placeholder="e.g. M, 32 × 30"></div>
+  <div><label class="f" for="fPref">Preference</label><select id="fPref">${PREFS.map(([v,n])=>`<option value="${v}"${v===prefOf(ff.pref)?' selected':''}>${n}</option>`).join('')}</select></div></div>
+  <label class="f" for="fNotes">Notes</label><input id="fNotes" maxlength="200" value="${esc(ff.notes||'')}" placeholder="e.g. only the gray heather; runs small, size up">
+  <div class="actions"><button class="btn" id="favSave">${ff.i!=null?'Save changes':'Add item'}</button><button class="btn ghost" id="favCancel">Cancel</button><span class="note" id="favMsg" role="status"></span></div></div>`:'';
+ const list=fl.length?fl.map(f=>`<div class="fav"><div class="favcat">${esc(f.cat||'Other')}</div><div><b>${esc(f.brand||'')}</b>${f.style?' '+esc(f.style):''}<div class="note">${[f.mat,f.size&&'Size '+f.size].filter(Boolean).map(esc).join(' · ')}${f.notes?(f.mat||f.size?' — ':'')+esc(f.notes):''}</div></div><span class="pill p-${prefOf(f.pref)}">${PREFS.find(x=>x[0]===prefOf(f.pref))[1]}</span><div class="favbtn"><button class="btn ghost small" data-favedit="${f.i}">Edit</button><button class="btn danger small" data-favdel="${f.i}">${S.confirm==='f'+f.i?'Confirm':'Delete'}</button></div></div>`).join(''):(ff?'':`<p class="muted">Nothing yet. Add his go-to jeans, tees, hoodies and sneakers.</p>`);
+ return `<div class="card"><div class="head"><div><h2>Casual favorites</h2><div class="note">Go-to brands, fits and fabrics, and what to avoid.</div></div>${ff?'':'<button class="btn small" data-favadd="1">+ Add item</button>'}</div>${form}${list}</div>`}
+function likesHtml(p){
+ const l=p.likes||{};
+ if(S.likesEdit)return `<div class="card"><div class="head"><h2>Interests</h2></div>${LIKES.map(([k,n,ph])=>`<div style="margin-bottom:12px"><label class="f" for="l-${k}">${n}</label><input id="l-${k}" maxlength="400" value="${esc(l[k]||'')}" placeholder="${ph}"></div>`).join('')}<p class="note">Separate items with commas.</p><div class="actions"><button class="btn" id="likesSave">Save</button><button class="btn ghost" id="likesCancel">Cancel</button><span class="note" id="likesMsg" role="status"></span></div></div>`;
+ const any=LIKES.some(([k])=>l[k]);
+ return `<div class="card"><div class="head"><div><h2>Interests</h2><div class="note">Colors, teams, music, hobbies and gift ideas.</div></div><button class="btn ghost small" id="likesEdit">${any?'Edit':'+ Add'}</button></div>${any?LIKES.filter(([k])=>l[k]).map(([k,n])=>`<div class="lrow"><div class="favcat">${n}</div><div class="tags">${tags(k,l[k])}</div></div>`).join(''):'<p class="muted">Add favorite colors, teams, musicians and hobbies.</p>'}</div>`}
+const savePerson=(p,extra)=>api('savePerson',{id:p.id,name:p.name,relation:p.relation||'',notes:p.notes||'',created:p.created,...extra});
 function banner(msg){const b=$('banner');b.textContent=msg||'';b.classList.toggle('hidden',!msg)}
 function entriesFor(pid){return S.entries.filter(e=>e.personId===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0))}
 function latest(pid){const out={};for(const e of entriesFor(pid))for(const k in (e.values||{})){if(!out[k])out[k]={v:e.values[k],date:e.date};else if(!out[k].prev)out[k].prev=e.values[k]}return out}
 
 function renderPeople(){
  const ps=[...S.people].sort((a,b)=>(a.order??a.created??0)-(b.order??b.created??0));
+ if(ps.length&&!ps.some(p=>p.id===S.sel))S.sel=ps[0].id;
  $('people').innerHTML=ps.map(p=>`<button class="chip" data-p="${esc(p.id)}" aria-pressed="${p.id===S.sel}">${esc(p.name)}${p.relation?`<small>${esc(p.relation)}</small>`:''}</button>`).join('')+`<button class="chip add" id="addP">+ Add person</button>`;
 }
 function renderPersonPanel(){
@@ -299,7 +343,7 @@ function renderTrack(){
   <p class="note">Tap a figure for step-by-step instructions. Leave anything you didn’t measure blank. Grey numbers are the last recorded values.</p>
  </form>`;
  const hist=list.length?`<div class="card" style="margin-top:24px"><h2 style="margin-bottom:12px">History</h2><div class="hist"><table><thead><tr><th>Date</th>${F.map(f=>`<th>${f.n}</th>`).join('')}<th>By</th><th></th></tr></thead><tbody>${list.map(e=>`<tr><td>${esc(fdate(e.date))}</td>${F.map(f=>`<td>${e.values?.[f.k]!=null?show(f,e.values[f.k]):''}</td>`).join('')}<td style="text-align:left">${esc(e.by||'')}</td><td><button class="btn ghost small" data-edit="${esc(e.id)}">Edit</button> <button class="btn danger small" data-del="${esc(e.id)}">${S.confirm===e.id?'Confirm':'Delete'}</button></td></tr>`).join('')}</tbody></table></div></div>`:'';
- el.innerHTML=`<div class="grid2">${left}${right}</div>${hist}`;
+ el.innerHTML=`<div class="lay"><div class="a-sum">${left}</div><div class="a-form">${right}</div><div class="a-fav">${favsHtml(p)}</div><div class="a-like">${likesHtml(p)}</div></div>${hist}`;
 }
 function renderGuide(){
  const f=FK[S.guide];
@@ -317,7 +361,7 @@ function readForm(){const fm=S.form;if(!$('mform'))return;fm.date=$('mDate').val
  document.querySelectorAll('#mform select[data-sz]').forEach(z=>{const k=z.dataset.sz,w=document.querySelector(`#mform select[data-wd="${k}"]`).value;fm.vals[k]=z.value?z.value+' '+w:''})}
 function setTab(t){$('tab-track').setAttribute('aria-selected',t==='track');$('tab-guide').setAttribute('aria-selected',t==='guide');
  $('view-track').classList.toggle('hidden',t!=='track');$('view-guide').classList.toggle('hidden',t!=='guide')}
-function select(id){readForm();S.sel=id;S.edit=null;S.form=null;S.confirm=null;try{localStorage.setItem('fr-sel',id)}catch(e){}render()}
+function select(id){readForm();S.sel=id;S.edit=null;S.form=null;S.confirm=null;S.favForm=null;S.likesEdit=false;try{localStorage.setItem('fr-sel',id)}catch(e){}render()}
 
 document.addEventListener('click',async ev=>{
  const t=ev.target.closest('button');if(!t)return;
@@ -325,10 +369,10 @@ document.addEventListener('click',async ev=>{
  if(t.id==='addP'||t.id==='addP2'){S.personForm={};S.confirm=null;renderPersonPanel();setTab('track');return}
  if(t.id==='editP'){const p=S.people.find(x=>x.id===S.sel);S.personForm={...p};S.confirm=null;renderPersonPanel();return}
  if(t.id==='pCancel'){S.personForm=null;S.confirm=null;renderPersonPanel();return}
- if(t.id==='pSave'){const name=$('pName').value.trim();if(!name){$('pName').focus();return}
+ if(t.id==='pSave'){if(S.busy)return;const name=$('pName').value.trim();if(!name){$('pName').focus();return}S.busy=true;t.disabled=true;t.textContent='Saving…';
   const pf=S.personForm,data={name,relation:$('pRel').value.trim(),notes:$('pNotes').value.trim(),created:pf.created||Date.now()};
   if(pf.order!=null)data.order=pf.order;
-  try{const id=pf.id||uid();readForm();await api('savePerson',{id,...data});S.sel=id;S.personForm=null;S.form=pf.id?S.form:null;render()}catch(e){banner('Couldn’t save: '+(e.message||e.code))}return}
+  try{const id=pf.id||uid();readForm();await api('savePerson',{id,...data});S.sel=id;S.personForm=null;S.form=pf.id?S.form:null;render()}catch(e){banner('Couldn’t save: '+(e.message||e.code));t.disabled=false;t.textContent='Save'}finally{S.busy=false}return}
  if(t.id==='pDel'){if(S.confirm!=='p'){S.confirm='p';renderPersonPanel();return}
   const pid=S.personForm.id;try{await api('deletePerson',{id:pid});S.personForm=null;S.sel=null;S.confirm=null;S.form=null;render()}catch(e){banner('Couldn’t delete: '+(e.message||e.code))}return}
  if(t.dataset.unit){readForm();
@@ -342,20 +386,35 @@ document.addEventListener('click',async ev=>{
  if(t.id==='cancelEdit'){S.edit=null;S.form=null;renderTrack();return}
  if(t.dataset.del){const id=t.dataset.del;if(S.confirm!==id){readForm();S.confirm=id;renderTrack();return}
   try{if(S.edit===id){S.edit=null;S.form=null}S.confirm=null;await api('deleteEntry',{id})}catch(e){banner('Couldn’t delete: '+(e.message||e.code))}return}
+ if(t.dataset.favadd){readForm();S.favForm={cat:'Jeans',pref:'fav'};S.confirm=null;renderTrack();return}
+ if(t.dataset.favedit!=null){readForm();const p=S.people.find(x=>x.id===S.sel);const i=+t.dataset.favedit;S.favForm={...(p.favorites||[])[i],i};S.confirm=null;renderTrack();return}
+ if(t.id==='favCancel'){readForm();S.favForm=null;renderTrack();return}
+ if(t.id==='favSave'){if(S.busy)return;const p=S.people.find(x=>x.id===S.sel),ff=S.favForm;
+  const item={cat:$('fCat').value,brand:$('fBrand').value.trim(),style:$('fStyle').value.trim(),mat:$('fMat').value,size:$('fSize').value.trim(),pref:$('fPref').value,notes:$('fNotes').value.trim()};
+  if(!item.brand&&!item.style){$('favMsg').textContent='Add a brand or a style.';return}
+  const list=[...(p.favorites||[])];if(ff.i!=null)list[ff.i]=item;else list.push(item);
+  $('favMsg').textContent='Saving…';readForm();S.busy=true;try{S.favForm=null;await savePerson(p,{favorites:list})}catch(e){S.favForm=ff;renderTrack();$('favMsg').textContent='Couldn’t save — try again.'}finally{S.busy=false}return}
+ if(t.dataset.favdel!=null){const i=+t.dataset.favdel;readForm();if(S.confirm!=='f'+i){S.confirm='f'+i;renderTrack();return}
+  const p=S.people.find(x=>x.id===S.sel);const list=(p.favorites||[]).filter((_,j)=>j!==i);S.confirm=null;try{await savePerson(p,{favorites:list})}catch(e){banner('Couldn’t delete — try again.')}return}
+ if(t.id==='likesEdit'){readForm();S.likesEdit=true;renderTrack();return}
+ if(t.id==='likesCancel'){readForm();S.likesEdit=false;renderTrack();return}
+ if(t.id==='likesSave'){const p=S.people.find(x=>x.id===S.sel);const likes={};for(const [k] of LIKES)likes[k]=$('l-'+k).value.trim();
+  $('likesMsg').textContent='Saving…';readForm();try{S.likesEdit=false;await savePerson(p,{likes})}catch(e){S.likesEdit=true;renderTrack();$('likesMsg').textContent='Couldn’t save — try again.'}return}
  if(t.id==='copyCsv'){const list=entriesFor(S.sel).slice().reverse();const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
   const rows=[['Date',...F.map(f=>f.n+(f.u==='len'?' (in)':f.u==='wt'?' (lb)':'')),'Measured by','Notes'],...list.map(e=>[e.date,...F.map(f=>e.values?.[f.k]??''),e.by||'',e.note||''])];
   try{await navigator.clipboard.writeText(rows.map(r=>r.map(q).join(',')).join('\n'));$('copyMsg').textContent='Copied — paste into a spreadsheet.'}catch(e){$('copyMsg').textContent='Copy was blocked by the browser.'}return}
 });
 document.addEventListener('submit',async ev=>{
- if(ev.target.id!=='mform')return;ev.preventDefault();readForm();
+ if(ev.target.id!=='mform')return;ev.preventDefault();if(S.busy)return;readForm();
  const fm=S.form,values={};for(const f of F){const v=fromInput(f,fm.vals[f.k]??'');if(v!=null)values[f.k]=f.u==='txt'?v:Math.round(v*100)/100}
  const msg=$('saveMsg');if(!Object.keys(values).length){msg.textContent='Enter at least one measurement.';return}
  if(!fm.date){msg.textContent='Add the date.';return}
  const data={personId:S.sel,date:fm.date,by:fm.by.trim(),note:fm.note.trim(),values,created:Date.now()};
- msg.textContent='Saving…';
+ msg.textContent='Saving…';S.busy=true;
  const eid=S.edit||uid(),keep=S.edit;try{if(S.edit){const old=S.entries.find(x=>x.id===S.edit);data.created=old?.created||data.created}
   await api('saveEntry',{id:eid,...data});S.edit=null;S.form=null;renderTrack();const m=$('saveMsg');if(m)m.textContent='Saved.'}
  catch(e){msg.textContent='Couldn’t save — check your connection and try again.'}
+ finally{S.busy=false}
 });
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.closest('#personPanel')&&ev.target.tagName==='INPUT'){ev.preventDefault();$('pSave').click()}});
 
@@ -371,7 +430,7 @@ async function load(quiet){
   if(j.error)throw new Error(j.error);S.needKey=false;banner('');apply(j)}
  catch(e){if(!quiet)banner('Couldn’t reach the measurements sheet. Check your connection and reload.')}}
 document.addEventListener('submit',ev=>{if(ev.target.id!=='keyform')return;ev.preventDefault();const k=$('kIn').value.trim();if(!k)return;S.key=k;S.needKey=false;try{localStorage.setItem('fr-key',k)}catch(e){}S.loaded=false;renderTrack();load()});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.loaded&&!S.edit&&!S.personForm)load(true)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.loaded&&!S.edit&&!S.personForm&&!S.favForm&&!S.likesEdit)load(true)});
 render();load();
 }
 </script>
