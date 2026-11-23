@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MTracker</title>
+<meta name="description" content="Family clothing measurements — how to measure, record fittings, sizes to shop.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6b1d2b">
+<meta name="apple-mobile-web-app-title" content="MTracker">
+<meta property="og:title" content="MTracker">
+<meta property="og:description" content="Family clothing measurements — suits, shirts and trousers.">
+<meta property="og:image" content="https://mtippleroc-prog.github.io/mtracker/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a good tailor's shop — calm, exact, a little ceremonial.
+   IDEA: the tailor's measurement card: a body figure with the tape drawn on it, and a ledger of numbers.
+   PICTURE: a figure with a yellow tape line showing exactly where each measurement goes.
+   COLOUR and TYPE: white ground, deep burgundy suiting band, tape-measure yellow only on the tape; Bodoni Moda titles + Work Sans.
+   LAYOUT: band with family members, then the size card and record form, the guide figure beside its steps. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#151113);--ink:light-dark(#1f1a1c,#f1eaec);--muted:light-dark(#6c6266,#b3a7ab);
+--band:light-dark(#6b1d2b,#40121b);--bandink:#fbf3f4;--line:light-dark(#e8e0e2,#33292c);--panel:light-dark(#faf6f7,#1d1719);
+--tape:#f2b705;--fig:light-dark(#ece6e8,#3a3135);--figline:light-dark(#9d9196,#7b6e73);--acc:light-dark(#6b1d2b,#e9a2b0);--bad:light-dark(#a32020,#ff8a80)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Work Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Bodoni Moda",Georgia,serif;line-height:1.05;margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,5vw,48px)}h2{font-size:clamp(26px,3.4vw,34px)}h3{font-size:20px}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header.band{background:var(--band);color:var(--bandink);padding-bottom:0}
+header p{margin:8px 0 18px;opacity:.85;max-width:60ch}
+.people{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:20px}
+.chip{font:inherit;font-weight:500;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--bandink);color:#6b1d2b;border-color:var(--bandink)}
+.chip small{opacity:.7;font-weight:400;margin-left:6px}
+.chip.add{border-style:dashed}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{font:inherit;font-weight:600;min-height:44px;padding:10px 18px;border:0;border-radius:10px 10px 0 0;background:rgba(255,255,255,.12);color:inherit;cursor:pointer}
+nav.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.btn{min-height:44px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--acc);background:var(--acc);color:var(--bg);font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--acc)}
+.btn.small{min-height:36px;padding:6px 12px;font-size:14px}
+.btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+input,select,textarea{font-size:16px;min-height:44px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+textarea{min-height:70px}
+label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
+@media(max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,2.4vw,26px)}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}
+.muted{color:var(--muted)}.note{font-size:14px;color:var(--muted)}
+.sizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 6px}
+.size{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg)}
+.size b{display:block;font-family:"Bodoni Moda",Georgia,serif;font-size:26px;line-height:1.1;white-space:nowrap}
+.size span{font-size:13px;color:var(--muted)}
+.ledger{width:100%;border-collapse:collapse;font-size:15px}
+.ledger td,.ledger th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left}
+.ledger td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ledger th{font-size:13px;font-weight:500;color:var(--muted)}
+.up{color:var(--acc);font-size:13px;margin-left:6px}
+.grp{margin-top:18px}.grp h3{margin-bottom:6px}
+.frow{display:grid;grid-template-columns:52px minmax(0,1fr) 128px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.frow .lbl{font-weight:600}.frow .lbl small{display:block;font-weight:400;color:var(--muted);font-size:13px;line-height:1.35}
+.thumb{width:52px;height:64px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0;cursor:pointer}
+.thumb svg{width:100%;height:100%;display:block}
+.unitin{position:relative}.unitin input{padding-right:40px;text-align:right}
+.unitin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:6px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);min-height:40px;padding:6px 14px;cursor:pointer;font-weight:500}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--bg)}
+.hist{overflow-x:auto}
+.hist table{border-collapse:collapse;font-size:14px;min-width:100%}
+.hist th,.hist td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.hist th:first-child,.hist td:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+.hist th{font-weight:500;color:var(--muted);font-size:13px}
+.guide{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:start}
+@media(max-width:700px){.guide{grid-template-columns:minmax(0,1fr)}}
+.bigfig{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;position:sticky;top:12px}
+.bigfig svg{width:100%;height:min(62vh,520px);display:block}
+.bigfig .cap{text-align:center;font-weight:600;margin-top:6px}
+@media(max-width:700px){.bigfig{position:static}.bigfig svg{height:320px}}
+.picks{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 18px}
+.picks button{min-height:40px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.picks button[aria-pressed=true]{border-color:var(--acc);background:var(--acc);color:var(--bg)}
+.steps{margin:12px 0 0;padding-left:22px}.steps li{margin:6px 0;max-width:62ch}
+.tip{margin-top:14px;padding:12px 14px;border-left:4px solid var(--tape);background:var(--panel);border-radius:0 8px 8px 0;font-size:15px}
+.basics{margin-top:28px}.basics ul{padding-left:20px}.basics li{margin:4px 0}
+.empty{padding:40px 20px;text-align:center}
+.panel{border:1.5px solid var(--acc);border-radius:14px;padding:18px;margin-bottom:20px;background:var(--panel)}
+.banner{padding:10px 14px;border-radius:8px;background:var(--panel);border:1px solid var(--line);margin-bottom:16px;font-size:14px}
+.hidden{display:none!important}
+.tape{fill:none;stroke:var(--tape);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.tick{fill:none;stroke:#3b2a00;stroke-width:1.3;stroke-dasharray:1 5;stroke-linecap:round}
+.dot{fill:var(--tape);stroke:#3b2a00;stroke-width:1}
+@media(max-width:600px){.frow{grid-template-columns:44px minmax(0,1fr) 104px;gap:8px}.thumb{width:44px;height:56px}}
+@media(prefers-reduced-motion:no-preference){.bigfig .tape{stroke-dasharray:600;animation:draw .7s ease-out}@keyframes draw{from{stroke-dashoffset:600}to{stroke-dashoffset:0}}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="body" viewBox="0 0 200 420">
+  <g fill="var(--fig)" stroke="var(--figline)" stroke-width="1.4" stroke-linejoin="round">
+   <path d="M52 92Q40 96 38 110L30 220Q30 232 38 232Q44 232 44 222L54 130Z"/>
+   <path d="M148 92Q160 96 162 110L170 220Q170 232 162 232Q156 232 156 222L146 130Z"/>
+   <path d="M62 236L98 236L98 260L94 400L72 400L64 300Z"/>
+   <path d="M102 236L138 236L136 300L128 400L106 400L102 260Z"/>
+   <ellipse cx="83" cy="404" rx="13" ry="5"/><ellipse cx="117" cy="404" rx="13" ry="5"/>
+   <path d="M88 76Q100 82 112 76L140 86Q150 90 150 100L140 200Q136 230 138 242L62 242Q64 230 60 200L50 100Q50 90 60 86Z"/>
+   <rect x="91" y="56" width="18" height="24" rx="4"/>
+   <ellipse cx="100" cy="36" rx="21" ry="25"/>
+  </g>
+ </symbol>
+</svg>
+
+<header class="band">
+ <div class="wrap">
+  <h1>MTracker</h1>
+  <p>Measurements for every suit, dress shirt and pair of trousers — with a soft tape, a helper, and a reminder of exactly where the tape goes.</p>
+  <div class="people" id="people" aria-label="Family members"></div>
+  <nav class="tabs" role="tablist">
+   <button role="tab" id="tab-track" aria-selected="true">Measurements</button>
+   <button role="tab" id="tab-guide" aria-selected="false">How to measure</button>
+  </nav>
+ </div>
+</header>
+
+<main>
+ <section class="band" id="view-track"><div class="wrap">
+  <div id="banner" class="banner hidden" role="status"></div>
+  <div id="personPanel" class="panel hidden"></div>
+  <div id="track"></div>
+ </div></section>
+
+ <section class="band hidden" id="view-guide"><div class="wrap">
+  <div class="guide">
+   <div class="bigfig"><svg id="bigsvg" viewBox="0 0 200 420" role="img" aria-label="Body figure with tape position"></svg><div class="cap" id="bigcap"></div></div>
+   <div>
+    <h2>Where the tape goes</h2>
+    <p class="muted">Pick a measurement to see the tape on the figure and the steps.</p>
+    <div class="picks" id="picks"></div>
+    <h3 id="gname"></h3>
+    <ol class="steps" id="gsteps"></ol>
+    <div class="tip" id="gtip"></div>
+    <div class="basics">
+     <h3>Before you start</h3>
+     <ul>
+      <li>Use a soft cloth or vinyl tape; keep it flat, never twisted.</li>
+      <li>Measure over a thin T-shirt or dress shirt — not a sweater or jacket.</li>
+      <li>Snug, not tight: you should be able to slide one finger under the tape.</li>
+      <li>Have a helper for sleeve, shoulder and inseam; the person being measured stands relaxed and looks straight ahead.</li>
+      <li>Measure twice. If the numbers differ, use the larger one.</li>
+      <li>Growing boys: re-measure every 4–6 months, and before any suit purchase.</li>
+     </ul>
+    </div>
+   </div>
+  </div>
+ </div></section>
+</main>
+
+<script>
+{
+// ===== Paste your Google Apps Script web app URL here (ends in /exec) =====
+const API='https://script.google.com/macros/s/AKfycbxs8cSg8aVrli3V12O0z7d6CnBMiSkIhFfOXwJyK5SinGUqYQuXogDQHbXYjwooRKWXYQ/exec';
+// ==========================================================================
+const F=[
+ {k:'neck',g:'s',n:'Neck',u:'len',vb:'50 10 100 110',d:'<ellipse cx="100" cy="70" rx="13" ry="4"/>',
+  s:['Wrap the tape around the base of the neck, where a shirt collar sits — just below the Adam’s apple.','Keep the tape level all the way around.','Slip one finger under the tape so it isn’t snug.','Round up to the nearest ½ inch. That number is the collar size.'],t:'A 15½ neck means a 15½ collar. If he’s between sizes, go up.'},
+ {k:'sleeve',g:'s',n:'Shirt sleeve',u:'len',vb:'80 40 110 200',d:'<path d="M100 68Q128 74 146 88Q160 96 163 110L172 222"/>',
+  s:['Stand straight with a hand on the hip, so the elbow bends a little.','Start at the bony bump at the center back of the neck.','Run the tape across the top of the shoulder, down past the elbow, to the wrist bone.','Read the total — that’s the dress-shirt sleeve length.'],t:'Dress shirts are sold as neck / sleeve, e.g. 15½ / 34. This one needs a helper.'},
+ {k:'chest',g:'s',n:'Chest',u:'len',vb:'30 60 140 120',d:'<ellipse cx="100" cy="122" rx="48" ry="7"/>',
+  s:['Arms relaxed at the sides; breathe normally.','Run the tape under the armpits, around the fullest part of the chest and across the shoulder blades.','Keep it level across the back — check in a mirror or have the helper look.','Snug, not tight.'],t:'Body chest is roughly the suit jacket size: a 40-inch chest usually wears a 40 jacket.'},
+ {k:'shoulder',g:'s',n:'Shoulder width',u:'len',vb:'30 50 140 100',d:'<path d="M54 90Q100 80 146 90"/>',
+  s:['Measure across the back, from the outer edge of one shoulder bone to the other.','Let the tape follow the natural curve of the upper back.','Keep shoulders relaxed, not pulled back.'],t:'Helps pick between slim and classic jacket cuts — the shoulders are the one part of a jacket a tailor can’t really fix.'},
+ {k:'jsleeve',g:'s',n:'Jacket sleeve',u:'len',vb:'90 60 100 180',d:'<path d="M146 90Q160 96 163 110L171 214"/>',
+  s:['Arm hanging naturally at the side.','Start at the shoulder point, where the shoulder meets the arm.','Run down the outside of the arm to where the wrist meets the hand.'],t:'A well-fitted jacket shows about ½ inch of shirt cuff.'},
+ {k:'waist',g:'p',n:'Trouser waist',u:'len',vb:'40 150 120 100',d:'<ellipse cx="100" cy="200" rx="42" ry="6"/>',
+  s:['Measure where he actually wears his trousers — usually at or just below the navel.','Keep a finger under the tape; no sucking in.','Round to the nearest inch for the pant waist size.'],t:'Dress trousers often sit higher than jeans, so note which one you measured.'},
+ {k:'seat',g:'p',n:'Seat / hips',u:'len',vb:'40 200 120 100',d:'<ellipse cx="100" cy="252" rx="41" ry="7"/>',
+  s:['Feet together, standing straight.','Wrap the tape around the fullest part of the seat.','Keep it level front to back.'],t:'Matters most for suits and dress trousers, especially for athletic or growing builds.'},
+ {k:'inseam',g:'p',n:'Inseam',u:'len',vb:'60 230 100 190',d:'<path d="M101 264L105 398"/>',
+  s:['Easiest: lay a pair of well-fitting pants flat and measure the inside leg seam from the crotch seam to the hem.','On the body: in socks, no shoes, measure from the crotch down the inside of the leg to just below the ankle bone.','Round to the nearest inch.'],t:'Trousers are sold waist × inseam, e.g. 32 × 30. Dress pants are often hemmed to order, so this is a guide.'},
+ {k:'outseam',g:'p',n:'Outseam',u:'len',vb:'80 220 90 200',d:'<path d="M142 236L140 300L132 398"/>',
+  s:['Start at the top of the waistband, at the side.','Run straight down the outside of the leg to where you want the hem.'],t:'Outseam minus inseam gives the rise — handy when a tailor asks.'},
+ {k:'thigh',g:'p',n:'Thigh',u:'len',vb:'70 240 100 90',d:'<ellipse cx="119" cy="278" rx="19" ry="4"/>',
+  s:['Around the fullest part of the upper thigh, about an inch below the crotch.','Keep the leg relaxed and weight on both feet.'],t:'Helps decide between slim, straight and athletic cuts.'},
+ {k:'height',g:'b',n:'Height',u:'len',vb:'0 0 200 420',d:'<path d="M188 12L188 408"/><path d="M180 12L196 12M180 408L196 408"/>',
+  s:['Shoes off, heels against a wall, looking straight ahead.','Lay a book flat on top of the head, mark the wall, and measure up from the floor.'],t:'Height picks the jacket length: roughly Short under 5′7″, Regular 5′8″–6′0″, Long 6′1″ and up.'},
+ {k:'weight',g:'b',n:'Weight',u:'wt',vb:'0 0 200 420',d:'',
+  s:['Same scale, same time of day, light clothes.'],t:'Not needed for tailoring, but useful for tracking growth and for some brands’ size charts.'},
+ {k:'shoe',g:'b',n:'Shoe size',u:'txt',vb:'60 370 90 50',d:'<path d="M104 412L132 412"/>',
+  s:['Record the US size of a dress shoe that fits well, plus width if not medium (e.g. 10½ D or 11 E).','Feet are largest late in the day — try shoes on then.'],t:'Text field — write it the way the shoe box does.'}
+];
+const G={s:'Shirts & suit jackets',p:'Trousers',b:'General'};
+const FK=Object.fromEntries(F.map(f=>[f.k,f]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+const S={people:[],entries:[],sel:null,unit:'in',edit:null,form:null,personForm:null,ok:false,guide:'neck',confirm:null,key:'',needKey:false,loaded:false};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+try{S.unit=localStorage.getItem('fr-unit')||'in';S.sel=localStorage.getItem('fr-sel');S.key=localStorage.getItem('fr-key')||''}catch(e){}
+{const m=location.hash.match(/k=([\w-]+)/);if(m){S.key=m[1];try{localStorage.setItem('fr-key',S.key)}catch(e){}history.replaceState(null,'',location.pathname+location.search)}}
+
+const overlay=f=>f.d?`<g class="tape">${f.d}</g><g class="tick">${f.d}</g>`:'';
+const thumb=f=>`<svg viewBox="${f.vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><use href="#body" width="200" height="420"/>${overlay(f)}</svg>`;
+const frac=v=>{const q=Math.round(v*4)/4,w=Math.floor(q),r=q-w;return (w||(r?'':'0'))+(['','¼','½','¾'][r*4]||'')};
+const show=(f,v)=>{if(v==null||v==='')return '—';if(f.u==='txt')return esc(v);
+ if(f.u==='wt')return S.unit==='in'?Math.round(v)+' lb':(v*0.453592).toFixed(1)+' kg';
+ if(S.unit==='cm')return (v*2.54).toFixed(1)+' cm';
+ if(f.k==='height'){const ft=Math.floor(v/12);return ft+'′ '+frac(v-ft*12)+'″'}
+ return frac(v)+'″'};
+const toInput=(f,v)=>v==null?'':f.u==='txt'?v:f.u==='wt'?(S.unit==='in'?+(+v).toFixed(1):+(v*0.453592).toFixed(1)):(S.unit==='in'?+(+v).toFixed(2):+(v*2.54).toFixed(1));
+const fromInput=(f,s)=>{s=String(s).trim();if(!s)return null;if(f.u==='txt')return s.slice(0,40);
+ const n=parseFloat(s.replace(',','.'));if(!isFinite(n)||n<=0)return null;
+ return f.u==='wt'?(S.unit==='in'?n:n/0.453592):(S.unit==='in'?n:n/2.54)};
+const unitLbl=f=>f.u==='txt'?'':f.u==='wt'?(S.unit==='in'?'lb':'kg'):(S.unit==='in'?'in':'cm');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fdate=s=>{if(!s)return '';const [y,m,d]=s.split('-');return new Date(+y,+m-1,+d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
+
+function banner(msg){const b=$('banner');b.textContent=msg||'';b.classList.toggle('hidden',!msg)}
+function entriesFor(pid){return S.entries.filter(e=>e.personId===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0))}
+function latest(pid){const out={};for(const e of entriesFor(pid))for(const k in (e.values||{})){if(!out[k])out[k]={v:e.values[k],date:e.date};else if(!out[k].prev)out[k].prev=e.values[k]}return out}
+
+function renderPeople(){
+ const ps=[...S.people].sort((a,b)=>(a.order??a.created??0)-(b.order??b.created??0));
+ $('people').innerHTML=ps.map(p=>`<button class="chip" data-p="${esc(p.id)}" aria-pressed="${p.id===S.sel}">${esc(p.name)}${p.relation?`<small>${esc(p.relation)}</small>`:''}</button>`).join('')+`<button class="chip add" id="addP">+ Add person</button>`;
+}
+function renderPersonPanel(){
+ const el=$('personPanel');const pf=S.personForm;if(!pf){el.classList.add('hidden');return}
+ el.classList.remove('hidden');
+ el.innerHTML=`<h3>${pf.id?'Edit person':'Add a family member'}</h3>
+ <div class="meta" style="margin-top:12px">
+  <div><label class="f" for="pName">Name</label><input id="pName" value="${esc(pf.name||'')}" maxlength="40"></div>
+  <div><label class="f" for="pRel">Relationship</label><input id="pRel" list="rels" value="${esc(pf.relation||'')}" maxlength="30"><datalist id="rels"><option>Son</option><option>Me</option><option>Father</option><option>Brother</option><option>Nephew</option><option>Father-in-law</option></datalist></div>
+ </div>
+ <label class="f" for="pNotes">Fit notes &amp; favorite brands</label><textarea id="pNotes" maxlength="600" placeholder="e.g. Slim fit shirts; Suit 38R; prefers flat-front trousers">${esc(pf.notes||'')}</textarea>
+ <div class="actions"><button class="btn" id="pSave">Save</button><button class="btn ghost" id="pCancel">Cancel</button>${pf.id?`<button class="btn danger" id="pDel">${S.confirm==='p'?'Tap again to delete person and all their measurements':'Delete person'}</button>`:''}</div>`;
+ $('pName').focus();
+}
+function sizeCard(L){
+ const v=k=>L[k]?.v;const out=[];
+ if(v('neck')&&v('sleeve'))out.push(['Dress shirt',frac(Math.ceil(v('neck')*2)/2)+' / '+Math.round(v('sleeve')),'neck / sleeve']);
+ else if(v('neck'))out.push(['Collar',frac(Math.ceil(v('neck')*2)/2),'neck size']);
+ if(v('chest')){const c=Math.round(v('chest')/2)*2;let len='';const h=v('height');if(h)len=h<67?'S':h<=72?'R':'L';out.push(['Suit jacket',c+len,h?'chest + length':'add height for S/R/L'])}
+ if(v('waist')&&v('inseam'))out.push(['Trousers',Math.round(v('waist'))+' × '+Math.round(v('inseam')),'waist × inseam']);
+ else if(v('waist'))out.push(['Trouser waist',Math.round(v('waist')),'add inseam for length']);
+ if(v('shoe'))out.push(['Shoe',esc(v('shoe')),'US']);
+ return out;
+}
+function renderTrack(){
+ const el=$('track');
+ if(S.needKey||!S.key){el.innerHTML=`<form class="card empty" id="keyform"><h2>Enter the family code</h2><p class="muted">Ask Dad for the code, or use the full link he sent.</p><div style="max-width:280px;margin:12px auto"><label class="f" for="kIn">Family code</label><input id="kIn" autocomplete="off"></div><button class="btn" type="submit">Open</button></form>`;return}
+ if(!S.loaded){el.innerHTML=`<div class="card empty"><p class="muted">Loading measurements…</p></div>`;return}
+ if(!S.people.length){el.innerHTML=`<div class="card empty"><h2>Start with the first fitting</h2><p class="muted">Add each son and family member, then record measurements with a soft tape. The “How to measure” tab shows where the tape goes.</p><button class="btn" id="addP2">+ Add a family member</button></div>`;return}
+ const p=S.people.find(x=>x.id===S.sel)||S.people[0];S.sel=p.id;
+ const L=latest(p.id),list=entriesFor(p.id),sc=sizeCard(L);
+ const known=F.filter(f=>L[f.k]);
+ const left=`<div class="card">
+  <div class="head"><div><h2>${esc(p.name)}</h2><div class="note">${esc(p.relation||'')}${list.length?` · last measured ${esc(fdate(list[0].date))}`:''}</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Units"><button data-unit="in" aria-pressed="${S.unit==='in'}">in / lb</button><button data-unit="cm" aria-pressed="${S.unit==='cm'}">cm / kg</button></div><button class="btn ghost small" id="editP">Edit</button></div></div>
+  ${sc.length?`<h3>Sizes to shop</h3><div class="sizes">${sc.map(s=>`<div class="size"><span>${s[0]}</span><b>${s[1]}</b><span>${s[2]}</span></div>`).join('')}</div><p class="note">A starting point from the latest measurements — brands vary, so check each brand’s chart.</p>`:''}
+  ${p.notes?`<div class="tip" style="margin-bottom:8px">${esc(p.notes)}</div>`:''}
+  <h3 style="margin-top:18px">Latest measurements</h3>
+  ${known.length?`<table class="ledger"><tbody>${known.map(f=>{const l=L[f.k];let ch='';if(f.u!=='txt'&&l.prev!=null&&+l.v!==+l.prev){const d=l.v-l.prev;ch=`<span class="up">${d>0?'+':'−'}${f.u==='wt'?show(f,Math.abs(d)):S.unit==='cm'?(Math.abs(d)*2.54).toFixed(1):frac(Math.abs(d))}</span>`}
+   return `<tr><td>${f.n}</td><td class="n">${show(f,l.v)}${ch}</td><td class="note">${esc(fdate(l.date))}</td></tr>`}).join('')}</tbody></table>`:`<p class="muted">No measurements yet — fill in the form to record the first set.</p>`}
+  <div class="actions"><button class="btn ghost small" id="copyCsv"${list.length?'':' disabled'}>Copy history (CSV)</button><span class="note" id="copyMsg" role="status"></span></div>
+ </div>`;
+ const fm=S.form||(S.form={date:today(),by:'',note:'',vals:{}});
+ const right=`<form class="card" id="mform" autocomplete="off">
+  <div class="head"><h2>${S.edit?'Edit measurement':'Record a fitting'}</h2></div>
+  <div class="meta"><div><label class="f" for="mDate">Date measured</label><input type="date" id="mDate" value="${esc(fm.date)}" required></div>
+  <div><label class="f" for="mBy">Measured by</label><input id="mBy" value="${esc(fm.by)}" maxlength="40" placeholder="e.g. Dad, the tailor"></div></div>
+  ${Object.keys(G).map(g=>`<div class="grp"><h3>${G[g]}</h3>${F.filter(f=>f.g===g).map(f=>`<div class="frow">
+   <button type="button" class="thumb" data-guide="${f.k}" aria-label="How to measure ${f.n}">${thumb(f)}</button>
+   <label class="lbl" for="v-${f.k}">${f.n}<small>${esc(f.s[0].length>70?f.s[0].slice(0,68).replace(/\s\S*$/,'')+'…':f.s[0])}</small></label>
+   <div class="unitin"><input id="v-${f.k}" data-k="${f.k}" ${f.u==='txt'?'':'inputmode="decimal"'} value="${esc(fm.vals[f.k]??'')}" placeholder="${L[f.k]?esc(String(toInput(f,L[f.k].v))):''}"><span>${unitLbl(f)}</span></div></div>`).join('')}</div>`).join('')}
+  <div style="margin-top:14px"><label class="f" for="mNote">Notes</label><textarea id="mNote" maxlength="500" placeholder="e.g. measured over dress shirt; fits Brooks Brothers 15½/33">${esc(fm.note)}</textarea></div>
+  <div class="actions"><button class="btn" type="submit"${S.ok?'':' disabled'}>${S.edit?'Save changes':'Save fitting'}</button>${S.edit?'<button type="button" class="btn ghost" id="cancelEdit">Cancel edit</button>':''}<span class="note" id="saveMsg" role="status"></span></div>
+  <p class="note">Tap a figure for step-by-step instructions. Leave anything you didn’t measure blank. Grey numbers are the last recorded values.</p>
+ </form>`;
+ const hist=list.length?`<div class="card" style="margin-top:24px"><h2 style="margin-bottom:12px">History</h2><div class="hist"><table><thead><tr><th>Date</th>${F.map(f=>`<th>${f.n}</th>`).join('')}<th>By</th><th></th></tr></thead><tbody>${list.map(e=>`<tr><td>${esc(fdate(e.date))}</td>${F.map(f=>`<td>${e.values?.[f.k]!=null?show(f,e.values[f.k]):''}</td>`).join('')}<td style="text-align:left">${esc(e.by||'')}</td><td><button class="btn ghost small" data-edit="${esc(e.id)}">Edit</button> <button class="btn danger small" data-del="${esc(e.id)}">${S.confirm===e.id?'Confirm':'Delete'}</button></td></tr>`).join('')}</tbody></table></div></div>`:'';
+ el.innerHTML=`<div class="grid2">${left}${right}</div>${hist}`;
+}
+function renderGuide(){
+ const f=FK[S.guide];
+ $('picks').innerHTML=Object.keys(G).map(g=>F.filter(x=>x.g===g).map(x=>`<button data-pick="${x.k}" aria-pressed="${x.k===f.k}">${x.n}</button>`).join('')).join('');
+ $('bigsvg').innerHTML=`<use href="#body" width="200" height="420"/>${overlay(f)}${f.d?`<circle class="dot" r="4" ${dotPos(f)}/>`:''}`;
+ $('bigcap').textContent=f.n;$('gname').textContent=f.n+' — '+G[f.g].toLowerCase();
+ $('gsteps').innerHTML=f.s.map(x=>`<li>${esc(x)}</li>`).join('');$('gtip').textContent=f.t;
+}
+function dotPos(f){const m=f.d.match(/M\s*([\d.]+)\s+([\d.]+)/)||f.d.match(/cx="([\d.]+)"\s+cy="([\d.]+)"/);if(!m)return 'cx="-9" cy="-9"';
+ if(f.d.startsWith('<ellipse')){const rx=+(f.d.match(/rx="([\d.]+)"/)[1]);return `cx="${+m[1]+rx}" cy="${m[2]}"`}return `cx="${m[1]}" cy="${m[2]}"`}
+function render(){renderPeople();renderPersonPanel();renderTrack();renderGuide()}
+
+function readForm(){const fm=S.form;if(!$('mform'))return;fm.date=$('mDate').value;fm.by=$('mBy').value;fm.note=$('mNote').value;
+ document.querySelectorAll('#mform input[data-k]').forEach(i=>{fm.vals[i.dataset.k]=i.value})}
+function setTab(t){$('tab-track').setAttribute('aria-selected',t==='track');$('tab-guide').setAttribute('aria-selected',t==='guide');
+ $('view-track').classList.toggle('hidden',t!=='track');$('view-guide').classList.toggle('hidden',t!=='guide')}
+function select(id){readForm();S.sel=id;S.edit=null;S.form=null;S.confirm=null;try{localStorage.setItem('fr-sel',id)}catch(e){}render()}
+
+document.addEventListener('click',async ev=>{
+ const t=ev.target.closest('button');if(!t)return;
+ if(t.dataset.p){select(t.dataset.p);setTab('track');return}
+ if(t.id==='addP'||t.id==='addP2'){S.personForm={};S.confirm=null;renderPersonPanel();setTab('track');return}
+ if(t.id==='editP'){const p=S.people.find(x=>x.id===S.sel);S.personForm={...p};S.confirm=null;renderPersonPanel();return}
+ if(t.id==='pCancel'){S.personForm=null;S.confirm=null;renderPersonPanel();return}
+ if(t.id==='pSave'){const name=$('pName').value.trim();if(!name){$('pName').focus();return}
+  const pf=S.personForm,data={name,relation:$('pRel').value.trim(),notes:$('pNotes').value.trim(),created:pf.created||Date.now()};
+  if(pf.order!=null)data.order=pf.order;
+  try{const id=pf.id||uid();readForm();await api('savePerson',{id,...data});S.sel=id;S.personForm=null;S.form=pf.id?S.form:null;render()}catch(e){banner('Couldn’t save: '+(e.message||e.code))}return}
+ if(t.id==='pDel'){if(S.confirm!=='p'){S.confirm='p';renderPersonPanel();return}
+  const pid=S.personForm.id;try{await api('deletePerson',{id:pid});S.personForm=null;S.sel=null;S.confirm=null;S.form=null;render()}catch(e){banner('Couldn’t delete: '+(e.message||e.code))}return}
+ if(t.dataset.unit){readForm();
+  // convert any typed values into the new unit
+  const old=S.unit;for(const k in S.form.vals){const f=FK[k];if(f.u==='txt'||S.form.vals[k]==='')continue;const v=fromInput(f,S.form.vals[k]);S.unit=t.dataset.unit;S.form.vals[k]=v==null?'':String(toInput(f,v));S.unit=old}
+  S.unit=t.dataset.unit;try{localStorage.setItem('fr-unit',S.unit)}catch(e){}renderTrack();return}
+ if(t.dataset.guide){S.guide=t.dataset.guide;renderGuide();setTab('guide');window.scrollTo({top:0});return}
+ if(t.dataset.pick){S.guide=t.dataset.pick;renderGuide();return}
+ if(t.id==='tab-track'){setTab('track');return}if(t.id==='tab-guide'){setTab('guide');return}
+ if(t.dataset.edit){const e=S.entries.find(x=>x.id===t.dataset.edit);S.edit=e.id;S.form={date:e.date,by:e.by||'',note:e.note||'',vals:Object.fromEntries(Object.entries(e.values||{}).map(([k,v])=>[k,FK[k]?String(toInput(FK[k],v)):'']))};renderTrack();$('mform').scrollIntoView({behavior:'smooth'});return}
+ if(t.id==='cancelEdit'){S.edit=null;S.form=null;renderTrack();return}
+ if(t.dataset.del){const id=t.dataset.del;if(S.confirm!==id){readForm();S.confirm=id;renderTrack();return}
+  try{if(S.edit===id){S.edit=null;S.form=null}S.confirm=null;await api('deleteEntry',{id})}catch(e){banner('Couldn’t delete: '+(e.message||e.code))}return}
+ if(t.id==='copyCsv'){const list=entriesFor(S.sel).slice().reverse();const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+  const rows=[['Date',...F.map(f=>f.n+(f.u==='len'?' (in)':f.u==='wt'?' (lb)':'')),'Measured by','Notes'],...list.map(e=>[e.date,...F.map(f=>e.values?.[f.k]??''),e.by||'',e.note||''])];
+  try{await navigator.clipboard.writeText(rows.map(r=>r.map(q).join(',')).join('\n'));$('copyMsg').textContent='Copied — paste into a spreadsheet.'}catch(e){$('copyMsg').textContent='Copy was blocked by the browser.'}return}
+});
+document.addEventListener('submit',async ev=>{
+ if(ev.target.id!=='mform')return;ev.preventDefault();readForm();
+ const fm=S.form,values={};for(const f of F){const v=fromInput(f,fm.vals[f.k]??'');if(v!=null)values[f.k]=f.u==='txt'?v:Math.round(v*100)/100}
+ const msg=$('saveMsg');if(!Object.keys(values).length){msg.textContent='Enter at least one measurement.';return}
+ if(!fm.date){msg.textContent='Add the date.';return}
+ const data={personId:S.sel,date:fm.date,by:fm.by.trim(),note:fm.note.trim(),values,created:Date.now()};
+ msg.textContent='Saving…';
+ const eid=S.edit||uid(),keep=S.edit;try{if(S.edit){const old=S.entries.find(x=>x.id===S.edit);data.created=old?.created||data.created}
+  await api('saveEntry',{id:eid,...data});S.edit=null;S.form=null;renderTrack();const m=$('saveMsg');if(m)m.textContent='Saved.'}
+ catch(e){msg.textContent='Couldn’t save — check your connection and try again.'}
+});
+document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.closest('#personPanel')&&ev.target.tagName==='INPUT'){ev.preventDefault();$('pSave').click()}});
+
+async function api(action,data){
+ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:S.key,action,data})});
+ const j=await r.json();if(j.error)throw new Error(j.error);apply(j);return j}
+function apply(j){S.people=j.people||[];S.entries=(j.entries||[]).map(e=>({...e,values:e.values||{}}));S.loaded=true;S.ok=true;readForm();renderPeople();renderTrack()}
+async function load(quiet){
+ if(!API.startsWith('https://')){banner('Setup needed: paste the Apps Script URL into index.html.');return}
+ if(!S.key){S.needKey=true;renderTrack();return}
+ try{const r=await fetch(API+'?k='+encodeURIComponent(S.key));const j=await r.json();
+  if(j.error==='bad key'){S.needKey=true;try{localStorage.removeItem('fr-key')}catch(e){}banner('That family code didn’t work.');renderTrack();return}
+  if(j.error)throw new Error(j.error);S.needKey=false;banner('');apply(j)}
+ catch(e){if(!quiet)banner('Couldn’t reach the measurements sheet. Check your connection and reload.')}}
+document.addEventListener('submit',ev=>{if(ev.target.id!=='keyform')return;ev.preventDefault();const k=$('kIn').value.trim();if(!k)return;S.key=k;S.needKey=false;try{localStorage.setItem('fr-key',k)}catch(e){}S.loaded=false;renderTrack();load()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.loaded&&!S.edit&&!S.personForm)load(true)});
+render();load();
+}
+</script>
+</body>
+</html>
