@@ -188,7 +188,7 @@ label.f{display:block;font-size:14px;font-weight:500;color:var(--muted);margin-b
   </div>
  </div></section>
 </main>
-<footer class="band note" style="text-align:center;padding-top:0">MTracker · page version 7</footer>
+<footer class="band note" style="text-align:center;padding-top:0">MTracker · page version 8</footer>
 
 <script>
 {
@@ -400,7 +400,7 @@ function sizeCard(L){
  const v=k=>L[k]?.v;const out=[];
  if(v('neck')&&v('sleeve'))out.push(['Dress shirt',frac(Math.ceil(v('neck')*2)/2)+' / '+Math.round(v('sleeve')),'neck / sleeve']);
  else if(v('neck'))out.push(['Collar',frac(Math.ceil(v('neck')*2)/2),'neck size']);
- if(v('chest')){const c=Math.round(v('chest')/2)*2;let len='';const h=v('height');if(h)len=h<67?'S':h<=72?'R':'L';out.push(['Suit jacket',c+len,h?'chest + length':'add height for S/R/L'])}
+ if(v('chest')){const c=Math.round(v('chest')/2)*2;let len='';const h=v('height');if(h)len=h<=67.5?'S':h<=72.5?'R':'L';out.push(['Suit jacket',c+len,h?'chest + length':'add height for S/R/L'])}
  if(v('waist')&&v('inseam'))out.push(['Trousers',Math.round(v('waist'))+' × '+Math.round(v('inseam')),'waist × inseam']);
  else if(v('waist'))out.push(['Trouser waist',Math.round(v('waist')),'add inseam for length']);
  if(v('head')){const h=hatSize(v('head'));out.push(['New Era',h.fitted+' · '+h.stretch,'59FIFTY fitted · 39THIRTY stretch']);out.push(['Scally cap',h.scally,'Boston Scally'])}
